@@ -11,7 +11,20 @@ Get-ChildItem $ScriptPath/src -Recurse -Filter "*.ps1" -File | Foreach {
 #endregion Depenencies
 
 #region Module Export
-Export-ModuleMember Format-Script*
+
+Export-ModuleMember Format-ScriptCondenseEnclosures
+Export-ModuleMember Format-ScriptConvertKeywordsAndOperatorsToLower
+Export-ModuleMember Format-ScriptExpandAliases
+Export-ModuleMember Format-ScriptExpandTypeAccelerators
+Export-ModuleMember Format-ScriptFormatCodeIndentation
+Export-ModuleMember Format-ScriptFormatCommandNames
+Export-ModuleMember Format-ScriptFormatTypeNames
+Export-ModuleMember Format-ScriptGetKindLines
+Export-ModuleMember Format-ScriptPadOperators
+Export-ModuleMember Format-ScriptReduceLineLength
+Export-ModuleMember Format-ScriptRemoveStatementSeparators
+Export-ModuleMember Format-ScriptRemoveSuperfluousSpaces
+Export-ModuleMember Format-ScriptReplaceHereStrings
 
 #region Module Cleanup
 $ExecutionContext.SessionState.Module.OnRemove = {

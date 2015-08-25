@@ -183,5 +183,3 @@
         Write-Verbose "$($FunctionName): End."
     }
 }
-
-Get-Content 'c:\Temp\test4.ps1' -Raw | Format-ScriptReduceLineLength -Verbose | clip
