@@ -56,8 +56,6 @@
             $ParseError | Write-Error
             throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry."
         }
-        
-        $TokenKinds = @($Tokens | Where {$_.Kind -like $Kind})
 
         for($t = $Tokens.Count - 2; $t -ge 2; $t--) {
             $token = $tokens[$t]

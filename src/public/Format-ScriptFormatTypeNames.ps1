@@ -50,7 +50,11 @@
             throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry."
         }
         Write-Verbose "$($FunctionName): Attempting to parse TypeExpressions within AST."
-        $types = $ast.FindAll({$args[0] -is [System.Management.Automation.Language.TypeExpressionAst] -or $args[0] -is [System.Management.Automation.Language.TypeConstraintAst]}, $true)
+        $predicate = {
+            ($args[0] -is [System.Management.Automation.Language.TypeExpressionAst]) -or 
+            ($args[0] -is [System.Management.Automation.Language.TypeConstraintAst])
+        }
+        $types = $ast.FindAll($predicate, $true)
 
         for($t = $types.Count - 1; $t -ge 0; $t--) {
             $type = $types[$t]

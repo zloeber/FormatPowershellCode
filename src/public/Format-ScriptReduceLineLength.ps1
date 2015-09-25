@@ -38,53 +38,6 @@
         $ParseError = $null
         $Tokens = $null
         $FunctionName = $MyInvocation.MyCommand.Name
-        Function Get-TokensOnLineNumber {
-            [CmdletBinding()]
-            param(
-                [parameter(Position=0, ValueFromPipeline=$true, Mandatory=$true, HelpMessage='Tokens to process.')]
-                [System.Management.Automation.Language.Token[]]$Tokens,
-                [parameter(Position=1, Mandatory=$true, HelpMessage='Line Number')]
-                [int]$LineNumber
-            )
-            begin {
-                $AllTokens = @()
-            }
-            process {
-                $AllTokens += $Tokens
-            }
-            end {
-                $AllTokens | Where {($_.Extent.StartLineNumber -eq $_.Extent.EndLineNumber) -and 
-                ($_.Extent.StartLineNumber -eq $LineNumber)}
-            }
-        }
-        
-        Function Get-BreakableTokens {
-            [CmdletBinding()]
-            param(
-                [parameter(Position=0, ValueFromPipeline=$true, Mandatory=$true, HelpMessage='Tokens to process.')]
-                [System.Management.Automation.Language.Token[]]$Tokens
-            )
-            begin {
-                $Kinds = @('Pipe')
-                # Flags found here: https://msdn.microsoft.com/en-us/library/system.management.automation.language.tokenflags(v=vs.85).aspx
-                $TokenFlags = @('BinaryPrecedenceAdd','BinaryPrecedenceMultiply','BinaryPrecedenceLogical')
-                $Kinds_regex = '^(' + (($Kinds | %{[regex]::Escape($_)}) -join '|') + ')$'
-                $TokenFlags_regex = '(' + (($TokenFlags | %{[regex]::Escape($_)}) -join '|') + ')'
-                $Results = @()
-                $AllTokens = @()
-            }
-            process {
-                $AllTokens += $Tokens
-            }
-            end {
-                Foreach ($Token in $AllTokens) {
-                    if (($Token.Kind -match $Kinds_regex) -or ($Token.TokenFlags -match $TokenFlags_regex)) {
-                        $Results += $Token
-                    }
-                }
-                $Results
-            }
-        }
         Write-Verbose "$($FunctionName): Begin."
     }
     process {
@@ -106,8 +59,8 @@
         $OutputScript = @()
         for($t = 0; $t -lt $SplitScriptText.Count; $t++) {
             [string]$CurrentLine = $SplitScriptText[$t]
+            Write-Debug "Line - $($t): $CurrentLine"
             if ($CurrentLine.Length -gt $Length) {
-        
                 $CurrentLineLength = $CurrentLine.Length
 
                 # find spaces at the beginning of our line.
@@ -124,10 +77,10 @@
                 $BreakableTokens = @($AllTokensOnLine | Get-BreakableTokens)
                 $DesiredBreakPoints = [Math]::Round($SplitScriptText[$t].Length / $AdjustedLineLength)
                 if ($BreakableTokens.Count -gt 0) {
-                    Write-Verbose "$($FunctionName): Total String Length: $($CurrentLineLength)"
-                    Write-Verbose "$($FunctionName): Breakpoint Locations: $($BreakableTokens.Extent.EndColumnNumber -join ', ')"
-                    Write-Verbose "$($FunctionName): Padding: $($PaddingLength)"
-                    Write-Verbose "$($FunctionName): Desired Breakpoints: $($DesiredBreakPoints)"
+                    Write-Debug "$($FunctionName): Total String Length: $($CurrentLineLength)"
+                    Write-Debug "$($FunctionName): Breakpoint Locations: $($BreakableTokens.Extent.EndColumnNumber -join ', ')"
+                    Write-Debug "$($FunctionName): Padding: $($PaddingLength)"
+                    Write-Debug "$($FunctionName): Desired Breakpoints: $($DesiredBreakPoints)"
                     if (($BreakableTokens.Count -eq 1) -or ($DesiredBreakPoints -ge $BreakableTokens.Count)) {
                         # if we only have a single breakpoint or the total breakpoints available is equal or less than our desired breakpoints 
                         # then simply split the line at every breakpoint.
@@ -173,9 +126,14 @@
                         }
                     }
                 }
+                else {
+                    # This line is long and has no plausible breaking points, oh well.
+                    $OutputScript += $CurrentLine
+                }
             }
             else {
-               $OutputScript += $CurrentLine
+                # This line doesn't need to be shortened.
+                $OutputScript += $CurrentLine
             }
         }
 

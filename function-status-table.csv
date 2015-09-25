@@ -1,0 +1,33 @@
+Function,Description,Example,Status,AST Used,Tokens Used,Regex Used,Notes
+Format-ScriptCondenseEnclosures,Move left curly braces to be at the end of the prior line instead of on their own line,"While ($true)
+{ Write-Output 'hello'}
+
+becomes…
+While ($true) { Write-Output 'hello'}",In Progress,NO,NO,YES,Prior to running this you should run Format-ScriptRemoveSuperfluousSpaces.
+Format-ScriptConvertKeywordsAndOperatorsToLower,Convert any keywords and operators to lower-case,[String] becomes [string],Depreciated,NO,YES,YES,
+Format-ScriptExpandAliases*,Expand aliases to full verb-noun command names,"gci -Path C:\Windows
+becomes…
+Get-ChildItem -Path C:\Windows",Finished,YES,NO,NO,Use Format-ScriptFormatCommandNames with the ExpandAliases switch
+Format-ScriptExpandTypeAccelerators,Expand shortened type accelerators to full name format,[String] becomes [System.String],Finished,NO,YES,NO,Default mode skips all system type accelerators.
+Format-ScriptFormatArraySpacing,Places a space after every comma in an array assignment,,Not Started,,,,
+Format-ScriptFormatCodeIndentation,Indent all code appropriately.,,Finished,NO,YES,NO,
+Format-ScriptFormatCommandNames,Properly formats command elements to be PascalCased.,"write-output 'test'
+becomes..
+Write-Output 'test'",Finished,YES,NO,NO,
+Format-ScriptFormatHashTables,Splits hash assignments out to their own lines,,Not Started,,,,
+Format-ScriptFormatOperatorSpacing,Places a space before and after every operator,,In Progress,,,,
+Format-ScriptFormatTypeNames,Converts typenames to be case-formated,[bool] becomes [Bool] and [system.string] becomes [System.String],In Progress,,,,
+Format-ScriptPadExpressions,Pad binary expressions with single spaces,"$b = $a+ 1 / 2*(2-10)+(50/20) +1
+becomes,
+$b = $a + 1 / 2 * (2 - 10) + (50 / 20) + 1",Finished,YES,NO,NO,
+Format-ScriptPadOperators,Pad assignment operators with single spaces,"$a =             0  # $a =             0
+becomes,
+$a = 0  # $a =             0",In Progress,,,,
+Format-ScriptRemoveSpacesAfterBackTicks,if backticks are used to split lines this can be used to fine any of these and remove any spaces at the end,,Not Started,,,,
+Format-ScriptRemoveStatementSeparators,Removes superfluous semicolons at the end of individual lines of code and splits them into their own lines of code.,,Finished,YES,YES,NO,
+Format-ScriptRemoveSuperfluousSpaces,Removes superfluous spaces at the end of any lines of code. Herestrings are ignored.,,Finished,NO,YES,NO,Generally this should be called first.
+Format-ScriptReplaceHereStrings,"Finds herestrings and replaces them with equivalent code to eliminate the herestring, this is best followed by",,Finished,NO,YES,NO,
+Format-ScriptReplaceIllegalCharacters,Find and replace goofy characters you may have copied from the web,,Not Started,,,,
+Format-ScriptReplaceLineEndings,Fix CRLF inconsistencies,,Not Started,,,,
+Format-ScriptReplaceOutNull,Replace piped output to out-null with $null = equivalent,,Not Started,,,,
+Format-ScriptReduceLineLength,Any lines past 130 characters (or however many characters you like) are broken into newlines at the pipeline characters if possible,,Finished,YES,YES,YES,

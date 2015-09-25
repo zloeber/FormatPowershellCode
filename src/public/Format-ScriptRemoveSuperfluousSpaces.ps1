@@ -28,6 +28,7 @@
         [string[]]$Code
     )
     begin {
+        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         $Codeblock = @()
         $FunctionName = $MyInvocation.MyCommand.Name
         Write-Verbose "$($FunctionName): Begin."
@@ -40,7 +41,7 @@
             $KindLines = $Codeblock | Format-ScriptGetKindLines -Kind "HereString*"
         }
         catch {
-            throw
+            throw 'Unable to properly parse the code for herestrings...'
         }
         $currline = 0
         foreach ($codeline in ($Codeblock -split "`r`n")) {
