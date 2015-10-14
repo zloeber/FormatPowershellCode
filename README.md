@@ -67,7 +67,8 @@ $ReportDataTemplate = @'
 }
 
 $Data = Get-Process | Sort-Object -Property CPU -Descending | select -First 5
-New-CPUReport 'My Rocking Report!' $Data```
+New-CPUReport 'My Rocking Report!' $Data
+```
 
 The here-strings are embedded in a function and are thusly unable to be indented without breaking the script entirely. Here is what we would like to happen to fix this:
 1. Convert here strings into simple multiple part string assignments
@@ -81,7 +82,8 @@ Get-Content .\tests\testcase-strings.ps1 -raw |
 	Format-ScriptReplaceHereStrings |
     Format-ScriptReduceLineLength |
     Format-ScriptFormatCodeIndentation | 
-    clip```
+    clip
+```
 The resulting code would look a bit less unsightly (though not by much as it was a fast and dumb example to begin with)
 ```
 function New-CPUReport ($Title,$Data) {
@@ -98,13 +100,15 @@ function New-CPUReport ($Title,$Data) {
 }
 
 $Data = Get-Process | Sort-Object -Property CPU -Descending | select -First 5
-New-CPUReport 'My Rocking Report!' $Data```
+New-CPUReport 'My Rocking Report!' $Data
+```
 
 ###Example 2 - Deobfuscation
 A truly obfuscated bit of PowerShell code will require more than this module to deobfuscate but this module may help a little bit in making it more readable. You may 'deobfuscate' a crazy looking one-liner you came up with to just get a job done in the heat of the moment. Here is a one-liner I purposefully made look like crap. It is a function that gets the lines of a script that token kinds are found between:
 
 ```
-function Format-ScriptGetKindLines {[CmdletBinding()]param([parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')][string[]]$Code,[parameter(Position=1, HelpMessage='Type of AST kind to retrieve.')][string]$Kind = "*"); begin {$Codeblock = @();$ParseError = $null; $Tokens = $null; $FunctionName = $MyInvocation.MyCommand.Name; Write-Verbose "$($FunctionName): Begin."}; process{$Codeblock += $Code }; end { $ScriptText = $Codeblock | Out-String;  Write-Verbose "$($FunctionName): Attempting to parse AST."; $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError);  if($ParseError) { $ParseError | Write-Error; throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry." }; $TokenKinds = @($Tokens | Where {$_.Kind -like $Kind}); Foreach ($Token in $TokenKinds) { New-Object psobject -Property @{ 'Start' = $Token.Extent.StartLineNumber; 'End' = $Token.Extent.EndLineNumber;}}; Write-Verbose "$($FunctionName): End." }}```
+function Format-ScriptGetKindLines {[CmdletBinding()]param([parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')][string[]]$Code,[parameter(Position=1, HelpMessage='Type of AST kind to retrieve.')][string]$Kind = "*"); begin {$Codeblock = @();$ParseError = $null; $Tokens = $null; $FunctionName = $MyInvocation.MyCommand.Name; Write-Verbose "$($FunctionName): Begin."}; process{$Codeblock += $Code }; end { $ScriptText = $Codeblock | Out-String;  Write-Verbose "$($FunctionName): Attempting to parse AST."; $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError);  if($ParseError) { $ParseError | Write-Error; throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry." }; $TokenKinds = @($Tokens | Where {$_.Kind -like $Kind}); Foreach ($Token in $TokenKinds) { New-Object psobject -Property @{ 'Start' = $Token.Extent.StartLineNumber; 'End' = $Token.Extent.EndLineNumber;}}; Write-Verbose "$($FunctionName): End." }}
+```
 
 In order to make this look more like a version which doesn't instantly give you a migraine you'd need to perform several transformations. Here is the general logic of what we will do:
 1. Turn statement separators (semicolons) into newlines
@@ -125,7 +129,8 @@ get-content .\tests\testcase-codeblockexpansion.ps1 -raw |
     Format-ScriptExpandParameterBlocks |
     Format-ScriptExpandStatementBlocks |
     Format-ScriptFormatCodeIndentation |
-    clip```
+    clip
+```
 
 Then you can go ahead and paste the output into your favorite editor to get something more palatable:
 
@@ -171,7 +176,8 @@ Format-ScriptGetKindLines
         }
         Write-Verbose "$($FunctionName): End."
     }
-}```
+}
+```
 
 **Note:** *I've included a vanity function you can tack on the end of any transform to move the beginning curly brace to the end of the prior line called  Format-ScriptCondenseEnclosures. I prefer my code with less wasted lines but its just a personal preference so the default for all expansion transforms is to place the start of blocks ({) on their own line.*
 
