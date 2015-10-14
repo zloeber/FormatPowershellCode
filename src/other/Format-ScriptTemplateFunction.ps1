@@ -1,19 +1,18 @@
-﻿function Format-ScriptReplaceHereStrings {
+﻿function Format-ScriptTemplateFunction {
     <#
     .SYNOPSIS
-        Replace here strings with variable created equivalents.
+
     .DESCRIPTION
-        Replace here strings with variable created equivalents.
+
     .PARAMETER Code
-        Multiple lines of code to analyze
+        Multiline or piped lines of code to process.
     .PARAMETER SkipPostProcessingValidityCheck
         After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
         (This is not recommended!)
-
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
-       PS > $test | Format-ScriptReplaceHereStrings | clip
+       PS > $test | Format-ScriptFormatTypeNames | clip
        
        Description
        -----------
@@ -27,12 +26,10 @@
 
        Version History
        1.0.0 - Initial release
-       1.0.1 - Fixed some replacements based on if the string is expandable or not.
-             - Changed output to be all one assignment rather than multiple assignments
     #>
     [CmdletBinding()]
     param(
-        [parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
+        [parameter(Position = 0, Mandatory = $true, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
         [AllowEmptyString()]
         [string[]]$Code,
         [parameter(Position = 1, HelpMessage='Bypass code validity check after modifications have been made.')]
@@ -40,27 +37,19 @@
     )
     begin {
         # Pull in all the caller verbose,debug,info,warn and other preferences
-        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         $FunctionName = $MyInvocation.MyCommand.Name
         Write-Verbose "$($FunctionName): Begin."
 
         $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-
-        function EscapeChars ([string]$line, [string]$linetype = "'") {
-            if ($linetype -eq "'") { $retline = $line -replace "'","''" }
-            else { $retline = $line }
-            if ($retline.length -gt 0) { $linetype + $retline + $linetype }
-            else { '' }
-        }
     }
     process {
         $Codeblock += $Code
     }
     end {
         $ScriptText = $Codeblock | Out-String
-
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  
@@ -69,26 +58,10 @@
             throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry."
         }
 
-        for($t = $Tokens.Count - 2; $t -ge 2; $t--) {
+        for($t = $Tokens.Count - 2; $t -ge 1; $t--) {
             $token = $tokens[$t]
-            if ($token.Kind -like "HereString*") {
-                switch ($token.Kind) {
-                    'HereStringExpandable' {
-                        $NewStringOp = '"'
-                    }
-                    default {
-                        $NewStringOp = "'"
-                    }
-                }
-                $HereStringVar = $tokens[$t - 2].Text
-                $HereStringAssignment = $tokens[$t - 1].Text
-                $RemoveStart = $tokens[$t - 2].Extent.StartOffset
-                $RemoveEnd = $Token.Extent.EndOffset - $RemoveStart
-                $HereStringText = @($Token.Value -split "`r`n")
-                $NewJoinString = (($HereStringText | Foreach { EscapeChars $_ $NewStringOp } | Where {-not [string]::IsNullOrEmpty($_)} ) -join ' + ')
-                $CodeReplacement = $HereStringVar + ' ' + $HereStringAssignment + ' ' + $NewJoinString
-                $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$CodeReplacement)
-            }
+            
+            # Process token replacement or some such
         }
         
         # Validate our returned code doesn't have any unintentionally introduced parsing errors.

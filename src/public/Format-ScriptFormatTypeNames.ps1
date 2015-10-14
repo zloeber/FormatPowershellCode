@@ -7,6 +7,9 @@
         (ie. [bool] becomes [Bool] and [system.string] becomes [System.String]).
     .PARAMETER Code
         Multiline or piped lines of code to process.
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+        (This is not recommended!)
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
@@ -27,15 +30,20 @@
     #>
     [CmdletBinding()]
     param(
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
-        [string[]]$Code
+        [parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
+        [AllowEmptyString()]
+        [string[]]$Code,
+        [parameter(Position=1, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
+        
         $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-        $FunctionName = $MyInvocation.MyCommand.Name
-        Write-Verbose "$($FunctionName): Begin."
     }
     process {
         $Codeblock += $Code
@@ -77,6 +85,14 @@
                 Write-Verbose "$($FunctionName): Replaced $($typeName) with $($Replacement)."
             }
         }
+        
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
+            }
+        }
+
         $ScriptText
         Write-Verbose "$($FunctionName): End."
     }

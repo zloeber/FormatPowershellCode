@@ -8,6 +8,9 @@
         Multi-line or piped lines of code to process.
     .PARAMETER ExpandAliases
         Epand any found aliases.
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+        (This is not recommended!)
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
@@ -29,20 +32,22 @@
 
     [CmdletBinding()]
     param(
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Multi-line or piped lines of code to process.')]
+        [parameter(Position = 0, Mandatory = $true, ValueFromPipeline=$true, HelpMessage='Multi-line or piped lines of code to process.')]
+        [AllowEmptyString()]
         [string[]]$Code,
-        [parameter(Position=1, HelpMessage='Epand any found aliases.')]
-        [switch]$ExpandAliases
+        [parameter(Position = 1, HelpMessage='Epand any found aliases.')]
+        [switch]$ExpandAliases,
+        [parameter(Position = 2, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
-        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-        $Codeblock = @()
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
 
+        $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-        $FunctionName = $MyInvocation.MyCommand.Name
-
-        Write-Verbose "$($FunctionName): Begin."
     }
     process {
         $Codeblock += $Code
@@ -54,7 +59,7 @@
  
         if($ParseError) { 
             $ParseError | Write-Error
-            throw "The parser will not work properly with errors in the script, please modify based on the above errors and retry."
+            throw "$($FunctionName): The parser will not work properly with errors in the script, please modify based on the above errors and retry."
         }
 
         $commands = $ast.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
@@ -74,6 +79,14 @@
                 $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$commandInfo.Name)
             }
         }
+
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
+            }
+        }
+
         $ScriptText
         Write-Verbose "$($FunctionName): End."
     }

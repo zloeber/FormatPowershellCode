@@ -8,6 +8,9 @@
         Multi-line or piped lines of code to process.
     .PARAMETER AllTypes
         Include system type accelerators.
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+       (This is not recommended!)
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
@@ -28,13 +31,21 @@
     #>
     [CmdletBinding()]
     param (
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to to process.')]
+        [parameter(Position = 0, Mandatory = $true, ValueFromPipeline=$true, HelpMessage='Lines of code to to process.')]
+        [AllowEmptyString()]
         [string[]]$Code,
-        [parameter(Position=1, HelpMessage='Expand all type accelerators to make your code look really complex!')]
-        [switch]$AllTypes
+        [parameter(Position = 1, HelpMessage='Expand all type accelerators to make your code look really complex!')]
+        [switch]$AllTypes,
+        [parameter(Position = 2, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
-       # Get all of our accelerator object
+        # Pull in all the caller verbose,debug,info,warn and other preferences
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
+        
+        # Get all of our accelerator objects
         $accelerators = [PSObject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
         
         # All accelerators returned to a hash
@@ -71,7 +82,7 @@
  
         if($ParseError) { 
             $ParseError | Write-Error
-            throw "The parser will not work properly with errors in the script, please modify based on the above errors and retry."
+            throw "$($FunctionName): The parser will not work properly with errors in the script, please modify based on the above errors and retry."
         }
      
         for($t = $Tokens.Count - 2; $t -ge 1; $t--) {
@@ -82,14 +93,22 @@
             if (($token.Kind -match 'identifier') -and ($token.TokenFlags -match 'TypeName')) {
                 if ($usedarray -contains $Token.Text) {
                     $replaceval = $usedhash[$Token.Text]
-                    Write-Verbose "Expand-TypeAccelerators: ....Updating to $($replaceval)"
+                    Write-Verbose "$($FunctionName):....Updating to $($replaceval)"
                     $RemoveStart = ($Token.Extent).StartOffset
                     $RemoveEnd = ($Token.Extent).EndOffset - $RemoveStart
                     $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$replaceval)
                 }
             }
         }
+        
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
+            }
+        }
 
         $ScriptText
+        Write-Verbose "$($FunctionName): End."
     }
 }

@@ -6,6 +6,9 @@
         Pads powershell expressions with single spaces. Expressions padded include +,-,/,%, and *
     .PARAMETER Code
         Multi-line or piped lines of code to process.
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+        (This is not recommended!)
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
@@ -26,23 +29,25 @@
     #>
     [CmdletBinding()]
     param(
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
-        [string[]]$Code
+        [parameter(Position=0, Mandatory=$true, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
+        [AllowEmptyString()]
+        [string[]]$Code,
+        [parameter(Position=1, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
-        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
 
         $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-        $FunctionName = $MyInvocation.MyCommand.Name
-        $predicate2 = {$args[0] -is [System.Management.Automation.Language.BinaryExpressionAst]}
         $predicate = {
             ($args[0] -is [System.Management.Automation.Language.CommandExpressionAst]) -and 
             (($args[0].FindAll($predicate2,$true)).count -gt 0)
         }
-        
-        Write-Verbose "$($FunctionName): Begin."
+        $predicate2 = {$args[0] -is [System.Management.Automation.Language.BinaryExpressionAst]}
     }
     process {
         $Codeblock += $Code
@@ -63,7 +68,9 @@
             $expression = $expressions[$t]
             $tmpexpression = $expression
             $EmbeddedCommandExpressionAST = $false
-            # There must be a better way to do this. Recurse through the parent nodes and look for embedded commandexpressionast types and skip them if found
+            
+            # Recurse through the parent nodes and look for embedded commandexpressionast types and skip them if found,
+            # (There must be a better way to do this....)
             while ($tmpexpression.Parent -ne $null) {
                 if ($tmpexpression.Parent.GetType().Name -eq 'CommandExpressionAST') {
                     $EmbeddedCommandExpressionAST = $true
@@ -91,6 +98,14 @@
                 $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$ExpressionString)
             }
         }
+        
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
+            }
+        }
+
         $ScriptText
         Write-Verbose "$($FunctionName): End."
     }

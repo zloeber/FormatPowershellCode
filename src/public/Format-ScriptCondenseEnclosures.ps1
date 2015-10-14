@@ -1,37 +1,45 @@
 ﻿function Format-ScriptCondenseEnclosures {
     <#
     .SYNOPSIS
-    Moves specified beginning enclosure types to the end of the prior line if found to be on its own line.
+        Moves specified beginning enclosure types to the end of the prior line if found to be on its own line.
     .DESCRIPTION
-    Moves specified beginning enclosure types to the end of the prior line if found to be on its own line.
+        Moves specified beginning enclosure types to the end of the prior line if found to be on its own line.
     .PARAMETER Code
-    Multiple lines of code to analyze
+        Multiple lines of code to analyze
     .PARAMETER EnclosureStart
-    Array of starting enclosure characters to process (default is (, {, @(, and @{)
+        Array of starting enclosure characters to process (default is (, {, @(, and @{)
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+        (This is not recommended!)
     .EXAMPLE
-    $test = Get-Content -Raw -Path 'C:\testcases\test-pad-operators.ps1'
-    $test | Format-ScriptCondenseEnclosures | clip
+        $test = Get-Content -Raw -Path 'C:\testcases\test-pad-operators.ps1'
+        $test | Format-ScriptCondenseEnclosures | clip
 
-    Description
-    -----------
-    Moves all beginning enclosure characters to the prior line if found to be sitting at the beginning of a line.
+        Description
+        -----------
+        Moves all beginning enclosure characters to the prior line if found to be sitting at the beginning of a line.
 
     .NOTES
-    Author: Zachary Loeber
-    Site: http://www.the-little-things.net/
+        Author: Zachary Loeber
+        Site: http://www.the-little-things.net/
 
-    1.0.0 - 01/25/2015
-    - Initial release
+        1.0.0 - 01/25/2015
+        - Initial release
     #>
     [CmdletBinding()]
     param(
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to look for and condense.')]
+        [parameter(Position = 0, Mandatory = $true, ValueFromPipeline=$true, HelpMessage='Lines of code to look for and condense.')]
+        [AllowEmptyString()]
         [string[]]$Code,
-        [parameter(Position=1, HelpMessage='Start of enclosure (typically left parenthesis or curly braces')]
-        [string[]]$EnclosureStart = @('{','(','@{','@(')
+        [parameter(Position = 1, HelpMessage='Start of enclosure (typically left parenthesis or curly braces')]
+        [string[]]$EnclosureStart = @('{','(','@{','@('),
+        [parameter(Position = 2, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
-        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
 
         $Codeblock = @()
         $enclosures = @()
@@ -51,7 +59,7 @@
                 $encfound = $Matches[1]
                 # if the prior line has any kind of comment/hash ignore it
                 if (-not ($Output[$Count - 1] -match '#')) {
-                    Write-Verbose "Condense-Enclosures: Condensed enclosure $($encfound) at line $LineCount"
+                    Write-Verbose "$($FunctionName): Condensed enclosure $($encfound) at line $LineCount"
                     $Output[$Count - 1] = "$($Output[$Count - 1]) $($encfound)"
                 }
                 else {
@@ -64,6 +72,15 @@
                 $Count++
             }
         }
+        
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $Output)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
+            }
+        }
+
         $Output
+        Write-Verbose "$($FunctionName): End."
     }
 }

@@ -6,7 +6,7 @@ RootModule = 'FormatPowerShellCode.psd1'
 ModuleToProcess = 'FormatPowerShellCode.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0'
+ModuleVersion = '1.1'
 
 # ID used to uniquely identify this module
 GUID = '52ab3c4e-7249-433c-b234-4ad5e8a7fff1'
@@ -21,7 +21,7 @@ CompanyName = ''
 Copyright = '(c) 2015 . All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'ADSI based Active Directory module'
+Description = 'Several functions for formatting powershell code.'
 
 # Minimum version of the Windows PowerShell engine required by this module
  PowerShellVersion = '3'

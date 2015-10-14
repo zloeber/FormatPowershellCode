@@ -1,4 +1,4 @@
-﻿function Format-RemoveStatementSeparators {
+﻿function Format-ScriptRemoveStatementSeparators {
     <#
     .SYNOPSIS
         Finds all statement separators (semicolons) not in for loops and converts them to newlines.
@@ -6,6 +6,9 @@
         Finds all statement separators (semicolons) not in for loops and converts them to newlines.
     .PARAMETER Code
         Multi-line or piped lines of code to process.
+    .PARAMETER SkipPostProcessingValidityCheck
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
+        (This is not recommended!)
     .EXAMPLE
        PS > $testfile = 'C:\temp\test.ps1'
        PS > $test = Get-Content $testfile -raw
@@ -26,20 +29,24 @@
     #>
     [CmdletBinding()]
     param(
-        [parameter(Position=0, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
-        [string[]]$Code
+        [parameter(Position = 0, Mandatory=$true, ValueFromPipeline=$true, HelpMessage='Lines of code to process.')]
+        [AllowEmptyString()]
+        [string[]]$Code,
+        [parameter(Position = 1, HelpMessage='Bypass code validity check after modifications have been made.')]
+        [switch]$SkipPostProcessingValidityCheck
     )
     begin {
-        Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        # Pull in all the caller verbose,debug,info,warn and other preferences
+        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        $FunctionName = $MyInvocation.MyCommand.Name
+        Write-Verbose "$($FunctionName): Begin."
 
         $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-        $FunctionName = $MyInvocation.MyCommand.Name
         $looppredicate = { ($args[0] -is [System.Management.Automation.Language.LoopStatementAst]) }
         $loopendpredicate = { ($args[0] -is [System.Management.Automation.Language.StatementBlockAst]) }
         $hashpredicate = { ($args[0] -is [System.Management.Automation.Language.HashtableAst]) }
-        Write-Verbose "$($FunctionName): Begin."
     }
     process {
         $Codeblock += $Code
@@ -79,6 +86,13 @@
                 $RemoveStart = $semi.Extent.StartOffset
                 $RemoveEnd = $semi.Extent.EndOffset - $RemoveStart
                 $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,"`r`n")
+            }
+        }
+
+        # Validate our returned code doesn't have any unintentionally introduced parsing errors.
+        if (-not $SkipPostProcessingValidityCheck) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+                throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
             }
         }
 
