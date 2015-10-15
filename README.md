@@ -207,3 +207,7 @@ I've also added the technique(s) used in the function for parsing the code. I've
 
 ##Credits
 [Haroopad](http://pad.haroopress.com/) - Sweet Markdown Editor
+
+[PowerShell Practice and Style](https://github.com/PoshCode/PowerShellPracticeAndStyle)
+
+

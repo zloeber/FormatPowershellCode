@@ -7,6 +7,7 @@
             if ($a) { Write-Output $true }
             
             becomes this:
+            
             if ($a)
             {
             Write-Output $true

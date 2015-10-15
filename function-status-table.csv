@@ -1,33 +1,72 @@
 Function,Description,Example,Status,AST Used,Tokens Used,Regex Used,Notes
+Format-ScriptFormatArraySpacing,Places a space after every comma in an array assignment,,Not Started,,,,
+Format-ScriptFormatHashTables,Splits hash assignments out to their own lines,,Not Started,,,,
+Format-ScriptRemoveSpacesAfterBackTicks,if backticks are used to split lines this can be used to fine any of these and remove any spaces at the end,,Not Started,,,,
+Format-ScriptReplaceLineEndings,Fix CRLF inconsistencies,,Not Started,,,,
+Format-ScriptReplaceOutNull,Replace piped output to out-null with $null = equivalent,,Not Started,,,,
 Format-ScriptCondenseEnclosures,Move left curly braces to be at the end of the prior line instead of on their own line,"While ($true)
 { Write-Output 'hello'}
 
 becomes…
 While ($true) { Write-Output 'hello'}",In Progress,NO,NO,YES,Prior to running this you should run Format-ScriptRemoveSuperfluousSpaces.
-Format-ScriptConvertKeywordsAndOperatorsToLower,Convert any keywords and operators to lower-case,[String] becomes [string],Depreciated,NO,YES,YES,
-Format-ScriptExpandAliases*,Expand aliases to full verb-noun command names,"gci -Path C:\Windows
-becomes…
-Get-ChildItem -Path C:\Windows",Finished,YES,NO,NO,Use Format-ScriptFormatCommandNames with the ExpandAliases switch
-Format-ScriptExpandTypeAccelerators,Expand shortened type accelerators to full name format,[String] becomes [System.String],Finished,NO,YES,NO,Default mode skips all system type accelerators.
-Format-ScriptFormatArraySpacing,Places a space after every comma in an array assignment,,Not Started,,,,
-Format-ScriptFormatCodeIndentation,Indent all code appropriately.,,Finished,NO,YES,NO,
-Format-ScriptFormatCommandNames,Properly formats command elements to be PascalCased.,"write-output 'test'
-becomes..
-Write-Output 'test'",Finished,YES,NO,NO,
-Format-ScriptFormatHashTables,Splits hash assignments out to their own lines,,Not Started,,,,
 Format-ScriptFormatOperatorSpacing,Places a space before and after every operator,,In Progress,,,,
 Format-ScriptFormatTypeNames,Converts typenames to be case-formated,[bool] becomes [Bool] and [system.string] becomes [System.String],In Progress,,,,
+Format-ScriptPadOperators,Pad assignment operators with single spaces,"$a =             0  # $a =             0
+becomes,
+$a = 0  # $a =             0",Finished,,,,
+Format-ScriptExpandTypeAccelerators,"Expand shortened type accelerators to full name format. 
+Has a flag to expand all types if you want to make your code look way more complex than it actually is :)",[String] becomes [System.String],Finished,NO,YES,NO,Default mode skips all system type accelerators.
+Format-ScriptFormatCodeIndentation,Indent all code appropriately. Default is 4 spaces.,,Finished,NO,YES,NO,
+Format-ScriptFormatCommandNames,"Properly formats command elements to be PascalCased.
+Also has a flag to expand command aliases","write-output 'test'
+becomes..
+Write-Output 'test'",Finished,YES,NO,NO,
 Format-ScriptPadExpressions,Pad binary expressions with single spaces,"$b = $a+ 1 / 2*(2-10)+(50/20) +1
 becomes,
 $b = $a + 1 / 2 * (2 - 10) + (50 / 20) + 1",Finished,YES,NO,NO,
-Format-ScriptPadOperators,Pad assignment operators with single spaces,"$a =             0  # $a =             0
-becomes,
-$a = 0  # $a =             0",In Progress,,,,
-Format-ScriptRemoveSpacesAfterBackTicks,if backticks are used to split lines this can be used to fine any of these and remove any spaces at the end,,Not Started,,,,
-Format-ScriptRemoveStatementSeparators,Removes superfluous semicolons at the end of individual lines of code and splits them into their own lines of code.,,Finished,YES,YES,NO,
-Format-ScriptRemoveSuperfluousSpaces,Removes superfluous spaces at the end of any lines of code. Herestrings are ignored.,,Finished,NO,YES,NO,Generally this should be called first.
-Format-ScriptReplaceHereStrings,"Finds herestrings and replaces them with equivalent code to eliminate the herestring, this is best followed by",,Finished,NO,YES,NO,
-Format-ScriptReplaceIllegalCharacters,Find and replace goofy characters you may have copied from the web,,Not Started,,,,
-Format-ScriptReplaceLineEndings,Fix CRLF inconsistencies,,Not Started,,,,
-Format-ScriptReplaceOutNull,Replace piped output to out-null with $null = equivalent,,Not Started,,,,
-Format-ScriptReduceLineLength,Any lines past 130 characters (or however many characters you like) are broken into newlines at the pipeline characters if possible,,Finished,YES,YES,YES,
+Format-ScriptRemoveStatementSeparators,"Removes superfluous semicolons at the end of individual lines of code and splits them into their own lines of code.
+Ignores for loops.",,Finished,YES,YES,NO,
+Format-ScriptRemoveSuperfluousSpaces,"Removes superfluous spaces at the end of any lines of code. 
+Herestrings and comments are ignored.",,Finished,NO,YES,NO,Generally this should be called first.
+Format-ScriptReplaceHereStrings,"Finds herestrings and replaces them with equivalent code to eliminate the herestring,
+ this is best followed by Format-ScriptReduceLineLength for obvious reasons.",,Finished,NO,YES,NO,
+Format-ScriptReduceLineLength,"Any lines past 130 characters (or however many characters you like) 
+are broken into newlines at the pipeline characters if possible",,Finished,YES,YES,YES,
+Format-ScriptTestCodeBlock,Confirm code block is valid,,Finished,YES,NO,NO,
+Format-ScriptExpandFunctionBlocks,Expand any function code blocks from inline to a more readable format. Has a flag to skip single line blocks if desired.,"function testfunction { Write-Output $_ }
+
+becomes this:
+
+function testfunction
+{
+Write-Output $_
+}",Finished,YES,NO,NO,
+Format-ScriptExpandNamedBlocks,"Expand any named code blocks (begin/process/end) found in curly braces
+ from inline to a more readable format.  Has a flag to skip single line blocks if desired.","begin { Write-Output $_ }
+
+becomes this:
+
+begin
+{
+Write-Output $_
+}",Finished,YES,NO,NO,
+Format-ScriptExpandParameterBlocks,"Expand any parameter code blocks (like if/then/else) found in curly braces from 
+inline to a more readable format. Has a flag to split parameter types into their own lines
+if that is your thing.",,Finished,YES,NO,NO,
+Format-ScriptExpandStatementBlocks,"Expand any statement code blocks (like if/then/else) found in curly braces from 
+inline to a more readable format. Has a flag to skip single line blocks if desired.","if ($a) { Write-Output $true }
+
+becomes this:
+
+if ($a)
+{
+Write-Output $true
+}",Finished,YES,NO,NO,
+Format-ScriptExpandAliases*,Expand aliases to full verb-noun command names. ,"gci -Path C:\Windows
+becomes…
+Get-ChildItem -Path C:\Windows",Depreciated,YES,NO,NO,Use Format-ScriptFormatCommandNames with the ExpandAliases switch
+Format-ScriptReplaceInvalidCharacters,"Find and replace goofy characters you may have copied from the web. 
+Ignores here-strings, strings, and comments.","“ becomes ""
+” becomes ""
+’ becomes '
+‘ becomes '     (This is NOT the same as the line continuation character, the backtick, even if it looks the same in many editors)",Completed,YES,YES,YES,

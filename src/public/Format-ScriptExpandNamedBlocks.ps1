@@ -7,6 +7,7 @@
             begin { Write-Output $_ }
             
             becomes this:
+            
             begin
             {
             Write-Output $_

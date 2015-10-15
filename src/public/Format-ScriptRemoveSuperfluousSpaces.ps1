@@ -47,7 +47,8 @@
     }
     end {
         try {
-            $KindLines = $Codeblock | Format-ScriptGetKindLines -Kind "HereString*"
+            $KindLines = @($Codeblock | Format-ScriptGetKindLines -Kind "HereString*")
+            $KindLines += @($Codeblock | Format-ScriptGetKindLines  -Kind 'Comment')
         }
         catch {
             throw 'Unable to properly parse the code for herestrings...'
