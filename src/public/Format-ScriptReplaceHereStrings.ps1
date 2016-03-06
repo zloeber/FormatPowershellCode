@@ -52,7 +52,13 @@
             if ($linetype -eq "'") { 
                 $retline = $line -replace "'","''" 
             }
-            else { $retline = $line }
+            else {
+                # First normalize any already escaped characters
+                $retline = $line -replace '`"','"' -replace "```'","'" -replace '`#','#' -replace '``','`'
+
+                # Then re-escape them
+                $retline = $retline -replace '`','``' -replace '"','`"' -replace "'","```'" -replace '#','`#' 
+            }
             if ($retline.length -gt 0) { 
                 $linetype + $retline + $linetype + ' + ' + '"`r`n"'
             }
@@ -106,7 +112,7 @@
         
         # Validate our returned code doesn't have any unintentionally introduced parsing errors.
         if (-not $SkipPostProcessingValidityCheck) {
-            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText)) {
+            if (-not (Format-ScriptTestCodeBlock -Code $ScriptText -ShowParsingErrors )) {
                 throw "$($FunctionName): Modifications made to the scriptblock resulted in code with parsing errors!"
             }
         }

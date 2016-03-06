@@ -7,7 +7,7 @@
     .PARAMETER Code
         Multi-line or piped lines of code to process.
     .PARAMETER ExpandAliases
-        Epand any found aliases.
+        Expand any found aliases.
     .PARAMETER SkipPostProcessingValidityCheck
         After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
         (This is not recommended!)
@@ -28,6 +28,8 @@
 
        Version History
        1.0.0 - Initial release
+       1.0.1 - Fixed improper handling of ? alias
+             - Added more verbose output
     #>
 
     [CmdletBinding()]
@@ -40,8 +42,12 @@
         [parameter(Position = 2, HelpMessage='Bypass code validity check after modifications have been made.')]
         [switch]$SkipPostProcessingValidityCheck
     )
+    
     begin {
-        if ($script:ThisModuleLoaded -eq $true) { Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState }
+        if ($script:ThisModuleLoaded -eq $true) {
+            # if we are not using the module then this function likely will not be loaded, if we are then try to inherit the calling script preferences
+            Get-CallerPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+        }
         $FunctionName = $MyInvocation.MyCommand.Name
         Write-Verbose "$($FunctionName): Begin."
 
@@ -66,17 +72,34 @@
 
         for($t = $commands.Count - 1; $t -ge 0; $t--) {
             $command = $commands[$t]
-		    $commandInfo = Get-Command -Name $command.GetCommandName() -ErrorAction SilentlyContinue
-            $commandElement = $command.CommandElements[0]
-            $RemoveStart = ($commandElement.Extent).StartOffset
-            $RemoveEnd = ($commandElement.Extent).EndOffset - $RemoveStart
-            if ($ExpandAliases -and ($commandInfo.CommandType -eq 'Alias')) {
-                Write-Verbose "$($FunctionName): Replacing Alias $($command.CommandElements[0].Extent.Text) with $($commandInfo.ResolvedCommandName)."
-                $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$commandInfo.ResolvedCommandName)
-            }
-            elseif (($commandInfo -ne $null) -and ($commandInfo.Name -cne $command.GetCommandName())) {
-                Write-Verbose "$($FunctionName): Replacing $($command.CommandElements[0].Extent.Text) with $($commandInfo.Name)."
-                $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$commandInfo.Name)
+            if ($command.GetCommandName() -ne $null) {
+                $commandInfo = Get-Command -Name $command.GetCommandName() -ErrorAction SilentlyContinue -Module "*"
+                $commandElement = $command.CommandElements[0]
+                $RemoveStart = ($commandElement.Extent).StartOffset
+                $RemoveEnd = ($commandElement.Extent).EndOffset - $RemoveStart
+                $commandsourceispath = $false
+                if (-not ([string]::IsNullOrWhiteSpace($commandInfo.Source))) {
+                    # validate that the command isn't simply an exe or cpl in our path (yeah, we gotta do that)
+                    $commandsourceispath = Test-Path $commandInfo.Source
+                }
+                if ($ExpandAliases -and ($commandInfo.CommandType -eq 'Alias')) {
+                    if ($command.GetCommandName() -eq '?') {
+                        #manually handle "?" because Get-Command and Get-Alias won't.
+                        Write-Verbose "$($FunctionName): Detected the Where-Object alias '?'"
+                        $ReplacementCommand = 'Where-Object'
+                    }
+                    else {
+                        $ReplacementCommand = $commandInfo.ResolvedCommandName
+                    }
+                    Write-Verbose "$($FunctionName): Replacing Alias $($command.CommandElements[0].Extent.Text) with $ReplacementCommand."
+                    $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$ReplacementCommand)
+                }
+                elseif (($commandInfo -ne $null) -and ($commandInfo.Name -cne $command.GetCommandName()) -and (-not $commandsourceispath)) {
+                    # if we have a command, its name isn't case sensitive equal to the get-command version, and the command isn't resolved to a path name
+                    # then we can replace it.
+                    Write-Verbose "$($FunctionName): Replacing the command $($command.CommandElements[0].Extent.Text) with $($commandInfo.Name)."
+                    $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$commandInfo.Name)
+                }
             }
         }
 
