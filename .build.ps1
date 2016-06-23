@@ -25,7 +25,7 @@
     To run the build:
     Ensure PlatyPS module is available to import
     Either get a copy of invoke-build.ps1 locally or install the module (install-module invokebuild) then just run,
-    
+
         invoke-build
 
 #>
@@ -78,21 +78,77 @@ task Version {
     assert ($ModVer -eq (($Version).ToString())) "The module manifest version ($($ModVer)) and release version ($($Version)) are mismatched."
 }
 
-# Synopsis: Remove generated and temp files and create base content tree
+# Synopsis: Remove/regenerate temp staging directory
 task Clean {
 	Remove-Item $TempPath -Force -Recurse -ErrorAction 0
     New-Item $TempPath -ItemType:Directory
-    New-Item "$($TempPath)\src" -ItemType:Directory
+}
 
+# Synopsis: Create base content tree in staging area
+task Stage {
+    New-Item "$($TempPath)\src" -ItemType:Directory
     Copy-Item -Path "$($ScriptRoot)\*.psm1" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\*.psd1" -Destination $TempPath
-    #Copy-Item -Path "$($ScriptRoot)\.psgallery" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\version.txt" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\Install.ps1" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\*.md" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\src\public" -Recurse -Destination "$($TempPath)\src"
     Copy-Item -Path "$($ScriptRoot)\src\private" -Recurse -Destination "$($TempPath)\src"
     Copy-Item -Path "$($ScriptRoot)\en-US" -Recurse -Destination $TempPath
+
+    # Collect a list of our public methods for later module manifest updates
+    $Script:FunctionsToExport = (Get-ChildItem -Path $TempPath\src\public).BaseName
+
+    # Load the manifest data
+    $Script:Manifest = Import-PowerShellDataFile -Path $TempPath\$ModuleToBuild.psd1
+}
+
+# Synopsis: Combine module into one script for staging
+task StageCombine {
+    Copy-Item -Path "$($ScriptRoot)\*.psd1" -Destination $TempPath
+    Copy-Item -Path "$($ScriptRoot)\version.txt" -Destination $TempPath
+    Copy-Item -Path "$($ScriptRoot)\Install.ps1" -Destination $TempPath
+    Copy-Item -Path "$($ScriptRoot)\*.md" -Destination $TempPath
+    Copy-Item -Path "$($ScriptRoot)\en-US" -Recurse -Destination $TempPath
+
+    $Manifest = Import-PowerShellDataFile -Path $TempPath\$ModuleToBuild.psd1
+
+    # if the Source folder has "Public" and optionally "Private" in it, then the psm1 must be assembled:
+    if(Test-Path (Join-Path $ScriptRoot 'src\Public') -Type Container) {
+        $Script:FunctionsToExport = (Get-ChildItem -Path (Join-Path $ScriptRoot 'src\Public')).BaseName
+        #Write-Verbose "       Collating Module Source"
+
+        if(!$Manifest.RootModule) {
+            $Manifest.RootModule = $Manifest.ModuleToProcess
+            if(!$Manifest.RootModule) {
+                $Manifest.RootModule = "$ModuleToBuild.psm1"
+            }
+        }
+
+        $ReleaseModule = Join-Path $TempPath $Manifest.RootModule
+        
+        Write-Verbose "       Setting content for $ReleaseModule"
+        Set-Content $ReleaseModule ((
+            (Get-Content (Join-Path $ScriptRoot 'src\private\*.ps1') -Raw) + 
+            (Get-Content (Join-Path $ScriptRoot 'src\public\*.ps1') -Raw)) -join "`r`n`r`n`r`n") -Encoding UTF8
+
+        # just in case this was missing we update the manifest rootmodule.
+        $Manifest.ModuleVersion = $Script:Version
+        $Manifest.FunctionsToExport = $Script:FunctionsToExport
+
+#        Update-Manifest $TempPath\$ModuleToBuild.psd1 -Property RootModule -Value $Manifest.RootModule
+
+        # If there are any folders that aren't Public, Private, Tests, or Specs ...
+        #$OtherFolders = Get-ChildItem $SourcePath -Directory -Exclude Public, Private, Tests, Specs
+        # Then we need to copy everything in them
+        #Copy-Item $OtherFolders -Recurse -Destination $TempPath
+
+        # Finally, we need to copy any files in the Source directory
+        #Get-ChildItem $ScriptRoot -File | 
+        #    Where Name -ne $RootModule | 
+        #    Copy-Item -Destination $TempPath
+
+    }
 }
 
 # Synopsis: Warn about not empty git status if .git exists.
@@ -128,17 +184,16 @@ task FormatCode {
 }
 
 # Synopsis: Update module manifest with exported functions and version.
-task UpdateModuleManifest {
-    $FunctionsToExport = (Get-ChildItem -Path $TempPath\src\public).BaseName
-    $Manifest = Import-PowerShellDataFile -Path $TempPath\$ModuleToBuild.psd1
+task UpdateModuleManifest -if ($Script:Manifest -ne $null){
     $Manifest.ModuleVersion = $Script:Version
-    $Manifest.FunctionsToExport = $FunctionsToExport
-    New-ModuleManifest @Manifest -Path $TempPath\$ModuleToBuild.psd1
-}
+    $Manifest.FunctionsToExport = $Script:FunctionsToExport
+    $PrivateData = $null
+    if ($Manifest.Keys -contains 'PrivateData') {
+        $PrivateData = New-Object -TypeName psobject -Property $Manifest.PrivateData.PSdata
+        $null = $Manifest.Remove('PrivateData')
+    }
 
-# Synopsis: Remove any script signatures which may be applied to the individual files
-task RemoveScriptSignatures {
-	 Get-ChildItem -Path $TempPath -File -Recurse | Remove-Signature
+    New-ModuleManifest @Manifest -Path $TempPath\$ModuleToBuild.psd1 -PrivateData $PrivateData
 }
 
 # Synopsis: Create new release version directory from our temporary build directory and copy our results
@@ -190,10 +245,19 @@ task PushRelease Version, {
 	exec { git tag -a "v$Version" -m "v$Version" }
 	exec { git push origin "v$Version" }
 }
+
+# Synopsis: Remove any script signatures which may be applied to the individual files
+task RemoveScriptSignatures {
+	 Get-ChildItem -Path $TempPath -File -Recurse | Remove-Signature
+}
 #>
 
+
 # Synopsis: The default build
-task . Version, Clean, CreateHelp,  FormatCode, UpdateModuleManifest, PushVersionRelease, PushCurrentRelease, GitStatus
+task . Version, Clean, Stage, CreateHelp,  FormatCode, UpdateModuleManifest, PushVersionRelease, PushCurrentRelease, GitStatus
 
 # Synopsis: Test the code formatting module only
-task TestModule Version, Clean, CreateHelp, FormatCode, UpdateModuleManifest
+task TestModule Version, Clean, Stage, CreateHelp, FormatCode, UpdateModuleManifest
+
+# Synopsis: Test combining the module into the temp build directory
+task TestCombine Version, Clean, StageCombine, UpdateModuleManifest
