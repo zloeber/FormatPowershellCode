@@ -28,6 +28,7 @@
        Version History
        1.0.0 - Initial release
        1.0.1 - fixed logic for embedded parameter blocks, added more verbose output.
+       1.0.1 - Fixed instance where parameter types were being shortened.
     #>
     [CmdletBinding()]
     param(
@@ -50,13 +51,19 @@
         $Tokens = $null
 
         $predicate = {$args[0] -is [System.Management.Automation.Language.ParamBlockAST]}
-        if ($SplitParameterTypeNames) { $TypeBreak = "`r`n" + '    ' } else { $TypeBreak = "" }
+        $typepredicate = {$args[0] -is [System.Management.Automation.Language.TypeConstraintAst]}
+        if ($SplitParameterTypeNames) {
+            $TypeBreak = "`r`n" + '    '
+        }
+        else {
+            $TypeBreak = "" 
+        }
     }
     process {
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  
@@ -111,18 +118,27 @@
 
                     for ($t2 = 0; $t2 -lt $AllParams.Count; $t2++) {
                         $CurrParam = $AllParams[$t2]
+                        $CurrParamType = ($CurrParam.FindAll($typepredicate, $true)).TypeName
                         Write-Verbose "$($FunctionName): Processing Parameter $($CurrParam.Name.Extent.Text)"
+                        Write-Verbose "$($FunctionName):  ... Parameter Type =  $($CurrParamType)"
                         $CurrParam.Attributes | Where {($_.PSobject.Properties.name -match "NamedArguments")} | ForEach {
                             $NewParamBlock += '    ' + $_.Extent.Text + "`r`n"
                         }
-                        # switch parameter types don't seem to have an easily grabable type accelerator shortcut from AST :(
+                        # switch parameter types don't seem to have an easily grabbable type accelerator shortcut from AST :(
                         if ($CurrParam.Statictype.Name -eq 'SwitchParameter') { 
                             $ParamType = 'switch'
                         } 
                         else {
-                            $ParamType = $CurrParam.Statictype.Name
+                            $ParamType =  $CurrParamType
                         }
-                        $NewParamBlock += '    ' + '[' + $ParamType + ']' + $TypeBreak + $CurrParam.Name.Extent.Text 
+                        # There is a chance no parameter was defined at all (System.Object is actually the default)
+                        # if this is the case then don't put any parameter in the output, Otherwise recreate the parameter line from scratch
+                        if (-not [string]::IsNullOrEmpty($ParamType)) {
+                            $NewParamBlock += '    ' + '[' + $ParamType + ']' + $TypeBreak + $CurrParam.Name.Extent.Text
+                        }
+                        else {
+                            $NewParamBlock += '    ' + $CurrParam.Name.Extent.Text
+                        }
                         if ($t2 -lt ($AllParams.Count - 1)) {
                             $NewParamBlock += ','
                         } 

@@ -17,7 +17,7 @@
         
         Description
         -----------
-        Removes all additional spaces and whitespace from the end of every non-herestring in C:\temp\test.ps1
+        Removes all additional spaces and whitespace from the end of every non-herestring/comment in C:\temp\test.ps1
 
     .NOTES
         Author: Zachary Loeber
@@ -70,7 +70,7 @@
             }
         }
 
-        $ScriptText = $ScriptText | Out-String
+        $ScriptText = ($ScriptText | Out-String).Trim("`r`n")
 
         # Validate our returned code doesn't have any unintentionally introduced parsing errors.
         if (-not $SkipPostProcessingValidityCheck) {
@@ -80,6 +80,7 @@
         }
         
         $ScriptText
+
         Write-Verbose "$($FunctionName): End."
     }
 }

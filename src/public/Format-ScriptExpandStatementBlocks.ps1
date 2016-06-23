@@ -70,7 +70,7 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  

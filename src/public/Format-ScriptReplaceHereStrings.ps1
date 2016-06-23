@@ -47,33 +47,12 @@
         $Codeblock = @()
         $ParseError = $null
         $Tokens = $null
-
-        function EscapeChars ([string]$line, [string]$linetype = "'") {
-            if ($linetype -eq "'") { 
-                $retline = $line -replace "'","''" 
-            }
-            else {
-                # First normalize any already escaped characters
-                $retline = $line -replace '`"','"' -replace "```'","'" -replace '`#','#' -replace '``','`'
-
-                # Then re-escape them
-                $retline = $retline -replace '`','``' -replace '"','`"' -replace "'","```'" -replace '#','`#' 
-            }
-            if ($retline.length -gt 0) { 
-                $linetype + $retline + $linetype + ' + ' + '"`r`n"'
-            }
-            else { 
-                if ($retline -match "`r`n") {
-                    '"`r`n"'
-                }
-            }
-        }
     }
     process {
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
 
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
@@ -101,9 +80,8 @@
                 $HereStringText = @($Token.Value -split "`r`n")
                 $NewJoinString = @()
                 for ($t2 = 0; $t2 -lt ($HereStringText.Count); $t2++) {
-                	$NewJoinString += EscapeChars $HereStringText[$t2] $NewStringOp
+                	$NewJoinString += Update-EscapableCharacters $HereStringText[$t2] $NewStringOp
                 }
-                #(($HereStringText | Foreach { EscapeChars $_ $NewStringOp }) -join ' + ')
 
                 $CodeReplacement = $HereStringVar + ' ' + $HereStringAssignment + ' ' + (($NewJoinString | Where {-not [string]::IsNullOrEmpty($_)})  -join ' + ')
                 $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$CodeReplacement)

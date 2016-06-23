@@ -59,7 +59,7 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
 
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  

@@ -1,0 +1,1353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<helpItems schema="maml">
+
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptCondenseEnclosures</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptCondenseEnclosures</command:noun>
+<maml:description><maml:para>Moves specified beginning enclosure types to the end of the prior line if found to be on its own line.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Moves all beginning enclosure characters to the prior line if found to be sitting at the beginning of a line.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptCondenseEnclosures</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>EnclosureStart</maml:name>
+<maml:Description><maml:para>Array of starting enclosure characters to process (default is (, {, @(, and @{)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>@('{','(','@{','@(')</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>EnclosureStart</maml:name>
+<maml:Description><maml:para>Array of starting enclosure characters to process (default is (, {, @(, and @{)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>@('{','(','@{','@(')</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>This function fails to 'condense' anything really complex and probably shouldn't even be used...
+</maml:para>
+<maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/
+</maml:para>
+<maml:para>1.0.0 - 01/25/2015 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$test = Get-Content -Raw -Path 'C:\testcases\test-pad-operators.ps1'</dev:code>
+<dev:remarks><maml:para>$test | Format-ScriptCondenseEnclosures | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptExpandFunctionBlocks</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptExpandFunctionBlocks</command:noun>
+<maml:description><maml:para>Expand any function code blocks found in curly braces from inline to a more readable format.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, expands code blocks and places the result in the clipboard.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptExpandFunctionBlocks</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptExpandFunctionBlocks | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptExpandNamedBlocks</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptExpandNamedBlocks</command:noun>
+<maml:description><maml:para>Expand any named code blocks found in curly braces from inline to a more readable format.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, expands code blocks and places the result in the clipboard.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptExpandNamedBlocks</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptExpandNamedBlocks | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptExpandParameterBlocks</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptExpandParameterBlocks</command:noun>
+<maml:description><maml:para>Expand any parameter blocks from inline to a more readable format.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, expands parameter blocks and places the result in the clipboard.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptExpandParameterBlocks</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SplitParameterTypeNames</maml:name>
+<maml:Description><maml:para>Place Parameter typenames on their own line.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SplitParameterTypeNames</maml:name>
+<maml:Description><maml:para>Place Parameter typenames on their own line.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release 1.0.1 - fixed logic for embedded parameter blocks, added more verbose output. 1.0.1 - Fixed instance where parameter types were being shortened.
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptExpandParameterBlocks | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptExpandStatementBlocks</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptExpandStatementBlocks</command:noun>
+<maml:description><maml:para>Expand any statement code blocks found in curly braces from inline to a more readable format.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, expands code blocks and places the result in the clipboard.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptExpandStatementBlocks</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>DontExpandSingleLineBlocks</maml:name>
+<maml:Description><maml:para>Skip expansion of a codeblock if it only has a single line.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptExpandStatementBlocks | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptExpandTypeAccelerators</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptExpandTypeAccelerators</command:noun>
+<maml:description><maml:para>Converts shorthand type accelerators to their full name.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, converts all type accelerators to their full name and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptExpandTypeAccelerators</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>AllTypes</maml:name>
+<maml:Description><maml:para>Include system type accelerators.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>AllTypes</maml:name>
+<maml:Description><maml:para>Include system type accelerators.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptExpandTypeAccelerators -AllTypes | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptFormatCodeIndentation</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptFormatCodeIndentation</command:noun>
+<maml:description><maml:para>Indents code blocks based on their level.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, indents all code and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptFormatCodeIndentation</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>Depth</maml:name>
+<maml:Description><maml:para>How many spaces to indent per level. Default is 4.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+<dev:type><maml:name>Int32</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>4</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>Depth</maml:name>
+<maml:Description><maml:para>How many spaces to indent per level. Default is 4.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+<dev:type><maml:name>Int32</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>4</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0 Modified a little bit from here: http://www.powershellmagazine.com/2013/09/03/pstip-tabify-your-script/
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptFormatCodeIndentation | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptFormatCommandNames</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptFormatCommandNames</command:noun>
+<maml:description><maml:para>Converts all found commands to proper case (aka. PascalCased).
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, PascalCase formats any commands found and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptFormatCommandNames</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>ExpandAliases</maml:name>
+<maml:Description><maml:para>Expand any found aliases.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>ExpandAliases</maml:name>
+<maml:Description><maml:para>Expand any found aliases.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release 1.0.1 - Fixed improper handling of ? alias       - Added more verbose output
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptFormatCommandNames | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptFormatTypeNames</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptFormatTypeNames</command:noun>
+<maml:description><maml:para>Converts typenames within code to be properly formated.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, formats any typenames found and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptFormatTypeNames</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptFormatTypeNames | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptPadExpressions</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptPadExpressions</command:noun>
+<maml:description><maml:para>Pads powershell expressions with single spaces.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, pads any expressions found with single spaces and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptPadExpressions</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptPadExpressions | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptPadOperators</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptPadOperators</command:noun>
+<maml:description><maml:para>Pads powershell assignment operators with single spaces.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, spaced all assignment operators and puts the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptPadOperators</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptPadOperators | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptReduceLineLength</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptReduceLineLength</command:noun>
+<maml:description><maml:para>Attempt to shorten long lines if possible.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, formats as the function defines and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptReduceLineLength</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>Length</maml:name>
+<maml:Description><maml:para>Number of characters to shorten long lines to. Default is 115 characters as this is best practice.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+<dev:type><maml:name>Int32</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>115</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>Length</maml:name>
+<maml:Description><maml:para>Number of characters to shorten long lines to. Default is 115 characters as this is best practice.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">Int32</command:parameterValue>
+<dev:type><maml:name>Int32</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>115</dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptReduceLineLength | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptRemoveStatementSeparators</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptRemoveStatementSeparators</command:noun>
+<maml:description><maml:para>Finds all statement separators (semicolons) not in for loops and converts them to newlines.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, remove statement separators and puts the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptRemoveStatementSeparators</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multi-line or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-RemoveStatementSeparators | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptRemoveSuperfluousSpaces</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptRemoveSuperfluousSpaces</command:noun>
+<maml:description><maml:para>Removes superfluous spaces at the end of individual lines of code.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Removes all additional spaces and whitespace from the end of every non-herestring/comment in C:\temp\test.ps1
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptRemoveSuperfluousSpaces</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze. Ignores all herestrings.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze. Ignores all herestrings.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/
+</maml:para>
+<maml:para>1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>$test = Get-Content $testfile -raw $test | Format-ScriptRemoveSuperfluousSpaces | Clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptReplaceHereStrings</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptReplaceHereStrings</command:noun>
+<maml:description><maml:para>Replace here strings with variable created equivalents.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, formats as the function defines and places the result in the clipboard  to be pasted elsewhere for review.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptReplaceHereStrings</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiple lines of code to analyze
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release 1.0.1 - Fixed some replacements based on if the string is expandable or not.       - Changed output to be all one assignment rather than multiple assignments
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptReplaceHereStrings | clip
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptReplaceInvalidCharacters</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptReplaceInvalidCharacters</command:noun>
+<maml:description><maml:para>Find and replaces invalid characters.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input, replaces invalid characters and places the result in the console window.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptReplaceInvalidCharacters</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>SkipPostProcessingValidityCheck</maml:name>
+<maml:Description><maml:para>After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check  (This is not recommended!)
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptReplaceInvalidCharacters
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+<command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+<command:details><command:name>Format-ScriptTestCodeBlock</command:name>
+<command:verb>Format</command:verb>
+<command:noun>ScriptTestCodeBlock</command:noun>
+<maml:description><maml:para>Validates there are no script parsing errors in a script.
+</maml:para>
+</maml:description>
+</command:details>
+<maml:description><maml:para>Takes C:\temp\test.ps1 as input and validates if the code is valid or not. Returns $true if it is, $false if it is not.
+</maml:para>
+</maml:description>
+<command:syntax><command:syntaxItem><maml:name>Format-ScriptTestCodeBlock</maml:name>
+<command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>ShowParsingErrors</maml:name>
+<maml:Description><maml:para>Display parsing errors if found.
+</maml:para>
+</maml:Description>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:syntaxItem>
+</command:syntax>
+<command:parameters><command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="1" aliases="none"><maml:name>Code</maml:name>
+<maml:Description><maml:para>Multiline or piped lines of code to process.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+<dev:type><maml:name>String[]</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue></dev:defaultValue>
+</command:parameter>
+<command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none"><maml:name>ShowParsingErrors</maml:name>
+<maml:Description><maml:para>Display parsing errors if found.
+</maml:para>
+</maml:Description>
+<command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+<dev:type><maml:name>SwitchParameter</maml:name>
+<maml:uri /></dev:type>
+<dev:defaultValue>False</dev:defaultValue>
+</command:parameter>
+</command:parameters>
+<command:inputTypes></command:inputTypes>
+<command:returnValues></command:returnValues>
+<maml:alertSet><maml:alert><maml:para>Author: Zachary Loeber Site: http://www.the-little-things.net/ Requires: Powershell 3.0
+</maml:para>
+<maml:para>Version History 1.0.0 - Initial release
+</maml:para>
+</maml:alert>
+</maml:alertSet>
+<command:examples><command:example><maml:title>-------------------------- EXAMPLE 1 --------------------------</maml:title>
+<dev:code>$testfile = 'C:\temp\test.ps1'</dev:code>
+<dev:remarks><maml:para>PS &gt; $test = Get-Content $testfile -raw PS &gt; $test | Format-ScriptTestCodeBlock
+</maml:para>
+</dev:remarks>
+</command:example>
+</command:examples>
+<command:relatedLinks><maml:navigationLink><maml:linkText>Online Version:</maml:linkText>
+<maml:uri></maml:uri>
+</maml:navigationLink>
+</command:relatedLinks>
+</command:command>
+</helpItems>
+

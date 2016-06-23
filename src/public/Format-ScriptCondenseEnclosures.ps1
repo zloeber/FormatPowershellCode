@@ -20,6 +20,8 @@
         Moves all beginning enclosure characters to the prior line if found to be sitting at the beginning of a line.
 
     .NOTES
+        This function fails to 'condense' anything really complex and probably shouldn't even be used...
+        
         Author: Zachary Loeber
         Site: http://www.the-little-things.net/
 
@@ -50,10 +52,18 @@
         $LineCount = 0
     }
     process {
-        $Codeblock += ($Code -split "`r`n")
+        $Codeblock += $Code
     }
     end {
-        $Codeblock | Foreach {
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
+        try {
+            $KindLines = @($ScriptText | Format-ScriptGetKindLines -Kind "HereString*")
+            $KindLines += @($ScriptText | Format-ScriptGetKindLines  -Kind 'Comment')
+        }
+        catch {
+            throw "$($FunctionName): Unable to properly parse the code for herestrings/comments..."
+        }
+        ($Codeblock  -split "`r`n")  | Foreach {
             $LineCount++
             if (($_ -match $regex) -and ($Count -gt 0)) {
                 $encfound = $Matches[1]

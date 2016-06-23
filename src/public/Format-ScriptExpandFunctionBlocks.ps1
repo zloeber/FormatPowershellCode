@@ -77,6 +77,7 @@
         $StartingBlocks = $Blocks.count
 
         for($t = 0; $t -lt $StartingBlocks; $t++) {
+            Write-Verbose "$($FunctionName): Processing itteration = $($t); Function $($Blocks[$t].Name) ."
             # We have to reprocess the entire ast lookup process every damn time we make a change. Must be a better way...
             $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
             $Blocks = $AST.FindAll($predicate, $true)

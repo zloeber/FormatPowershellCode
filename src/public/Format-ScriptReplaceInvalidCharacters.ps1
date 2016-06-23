@@ -55,7 +55,7 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
 
         # Grab a bunch of start and end character locations for different token types for later filtering.
         $stinglocations = @($ScriptText | Get-TokenKindLocations -kind 'StringLiteral','StringExpandable')

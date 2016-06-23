@@ -52,7 +52,7 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = $Codeblock | Out-String
+        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  
@@ -61,8 +61,8 @@
             throw "$($FunctionName): Will not work properly with errors in the script, please modify based on the above errors and retry."
         }
 
-        $LongLines = @()
-        $LongLinecount = 0
+        #$LongLines = @()
+        #$LongLinecount = 0
         $SplitScriptText = @($ScriptText -split "`r`n")
         $OutputScript = @()
         for($t = 0; $t -lt $SplitScriptText.Count; $t++) {
