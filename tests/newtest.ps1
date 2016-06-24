@@ -1,0 +1,1 @@
+Write-Host($subs | Format-Table -Property @{name="Option";expression={$global:indexSub;$global:indexSub+=1}}, SubscriptionId, SubscriptionName | Out-String)

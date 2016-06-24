@@ -35,7 +35,8 @@ $ModuleFullPath = (Get-Item "$($ModuleToBuild).psm1").FullName
 #$ModuleManifestFullPath = (Get-Item "$($ModuleToBuild).psd1").FullName
 $ScriptRoot = Split-Path $ModuleFullPath
 $TempPath = "$($ScriptRoot)\temp"
-$BuildPath = "$($ScriptRoot)\build"
+$StageReleasePath = Join-Path $TempPath 'release'
+#$BuildPath = "$($ScriptRoot)\build"
 $VersionFile = "$($ScriptRoot)\version.txt"
 $ReleasePath = "$($ScriptRoot)\release"
 $CurrentReleasePath = "$($ScriptRoot)\release\current"
@@ -61,15 +62,16 @@ function Out-Zip {
     [System.IO.Compression.ZipFile]::CreateFromDirectory($Directory, $FileName, $compressionLevel, $false)
 }
 
-# Synopsis: Validate script requirements are met and load build tools.
+<# Synopsis: Validate script requirements are met and load build tools.
 task Configure {
     # Dot source any build script functions we need to use
     Get-ChildItem $BuildPath/dotSource -Recurse -Filter "*.ps1" -File | Foreach { 
         Write-Verbose "Dot sourcing script file: $($_.Name)"
         . $_.FullName
     }
-
 }
+#>
+
 # Synopsis: Set $script:Version.
 task Version {
     $script:Version = [version](Get-Content $VersionFile)
@@ -85,70 +87,51 @@ task Clean {
 }
 
 # Synopsis: Create base content tree in staging area
-task Stage {
+task PrepareStage {
     New-Item "$($TempPath)\src" -ItemType:Directory
+    New-Item $StageReleasePath -ItemType:Directory
+
     Copy-Item -Path "$($ScriptRoot)\*.psm1" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\*.psd1" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\version.txt" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\Install.ps1" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\*.md" -Destination $TempPath
     Copy-Item -Path "$($ScriptRoot)\src\public" -Recurse -Destination "$($TempPath)\src"
     Copy-Item -Path "$($ScriptRoot)\src\private" -Recurse -Destination "$($TempPath)\src"
     Copy-Item -Path "$($ScriptRoot)\en-US" -Recurse -Destination $TempPath
 
-    # Collect a list of our public methods for later module manifest updates
-    $Script:FunctionsToExport = (Get-ChildItem -Path $TempPath\src\public).BaseName
-
     # Load the manifest data
     $Script:Manifest = Import-PowerShellDataFile -Path $TempPath\$ModuleToBuild.psd1
+    
+    # Collect a list of our public methods for later module manifest updates
+    $Script:FunctionsToExport = (Get-ChildItem -Path $TempPath\src\public).BaseName
 }
 
-# Synopsis: Combine module into one script for staging
-task StageCombine {
-    Copy-Item -Path "$($ScriptRoot)\*.psd1" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\version.txt" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\Install.ps1" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\*.md" -Destination $TempPath
-    Copy-Item -Path "$($ScriptRoot)\en-US" -Recurse -Destination $TempPath
-
-    $Manifest = Import-PowerShellDataFile -Path $TempPath\$ModuleToBuild.psd1
-
-    # if the Source folder has "Public" and optionally "Private" in it, then the psm1 must be assembled:
-    if(Test-Path (Join-Path $ScriptRoot 'src\Public') -Type Container) {
-        $Script:FunctionsToExport = (Get-ChildItem -Path (Join-Path $ScriptRoot 'src\Public')).BaseName
-        #Write-Verbose "       Collating Module Source"
-
-        if(!$Manifest.RootModule) {
-            $Manifest.RootModule = $Manifest.ModuleToProcess
-            if(!$Manifest.RootModule) {
-                $Manifest.RootModule = "$ModuleToBuild.psm1"
-            }
+# Synopsis: Assemble the module
+task PrepareModuleRelease {
+    if(-not $Script:Manifest.RootModule) {
+        $Script:Manifest.RootModule = $Manifest.ModuleToProcess
+        if(-not $Script:Manifest.RootModule) {
+            $Script:Manifest.RootModule = "$ModuleToBuild.psm1"
         }
-
-        $ReleaseModule = Join-Path $TempPath $Manifest.RootModule
-        
-        Write-Verbose "       Setting content for $ReleaseModule"
-        Set-Content $ReleaseModule ((
-            (Get-Content (Join-Path $ScriptRoot 'src\private\*.ps1') -Raw) + 
-            (Get-Content (Join-Path $ScriptRoot 'src\public\*.ps1') -Raw)) -join "`r`n`r`n`r`n") -Encoding UTF8
-
-        # just in case this was missing we update the manifest rootmodule.
-        $Manifest.ModuleVersion = $Script:Version
-        $Manifest.FunctionsToExport = $Script:FunctionsToExport
-
-#        Update-Manifest $TempPath\$ModuleToBuild.psd1 -Property RootModule -Value $Manifest.RootModule
-
-        # If there are any folders that aren't Public, Private, Tests, or Specs ...
-        #$OtherFolders = Get-ChildItem $SourcePath -Directory -Exclude Public, Private, Tests, Specs
-        # Then we need to copy everything in them
-        #Copy-Item $OtherFolders -Recurse -Destination $TempPath
-
-        # Finally, we need to copy any files in the Source directory
-        #Get-ChildItem $ScriptRoot -File | 
-        #    Where Name -ne $RootModule | 
-        #    Copy-Item -Destination $TempPath
-
     }
+    $ReleaseModule = Join-Path $StageReleasePath $Manifest.RootModule
+    
+    Set-Content $ReleaseModule ((
+        (Get-Content (Join-Path $TempPath 'src\private\*.ps1') -Raw) + 
+        (Get-Content (Join-Path $TempPath 'src\public\*.ps1') -Raw)) -join "`r`n`r`n`r`n") -Encoding UTF8
+
+    $Script:Manifest.ModuleVersion = $Script:Version
+    $Script:Manifest.FunctionsToExport = $Script:FunctionsToExport
+
+    # There is something wrong with -privatedata when passed into new-modulemanifest. this may not really work but it at least leaves a usable psd1
+    $PrivateData = $null
+    if ($Script:Manifest.Keys -contains 'PrivateData') {
+        $PrivateData = New-Object -TypeName psobject -Property $Script:Manifest.PrivateData.PSdata
+        $Script:Manifest.Remove('PrivateData')
+    }
+    $MyManifest = $Script:Manifest
+    New-ModuleManifest @MyManifest -Path $StageReleasePath\$ModuleToBuild.psd1 -PrivateData $PrivateData
+
+    # Copy over documentation last
+    Copy-Item -Path "$($TempPath)\en-US" -Recurse -Destination $StageReleasePath
 }
 
 # Synopsis: Warn about not empty git status if .git exists.
@@ -162,12 +145,12 @@ task GitStatus -If (Test-Path .git) {
 # Synopsis: Run code formatter against our working build (dogfood)
 task FormatCode {
     	Import-Module $ModuleFullPath
-        Get-ChildItem -Path $TempPath -Include "*.ps1","*.psm1" -Recurse -File | ForEach {
+        Get-ChildItem -Path $TempPath -Include "*.ps1","*.psm1" -Recurse -File | Where {$_.FullName -notlike "$($StageReleasePath)*"} | ForEach {
             $FormattedOutFile = $_.FullName
             Write-Output "Formatting File: $($FormattedOutFile)"
             $FormattedCode = get-content $_ -raw |
                 Format-ScriptRemoveStatementSeparators |
-                Format-ScriptExpandFunctionBlocks |
+               # Format-ScriptExpandFunctionBlocks |
                 Format-ScriptExpandNamedBlocks |
                 Format-ScriptExpandParameterBlocks |
                 Format-ScriptExpandStatementBlocks |
@@ -183,18 +166,35 @@ task FormatCode {
         Remove-Module $ModuleToBuild
 }
 
-# Synopsis: Update module manifest with exported functions and version.
-task UpdateModuleManifest -if ($Script:Manifest -ne $null){
-    $Manifest.ModuleVersion = $Script:Version
-    $Manifest.FunctionsToExport = $Script:FunctionsToExport
-    $PrivateData = $null
-    if ($Manifest.Keys -contains 'PrivateData') {
-        $PrivateData = New-Object -TypeName psobject -Property $Manifest.PrivateData.PSdata
-        $null = $Manifest.Remove('PrivateData')
-    }
+# Synopsis: Run PSScriptAnalyzer against the module
+task AnalyzeScripts {
 
-    New-ModuleManifest @Manifest -Path $TempPath\$ModuleToBuild.psd1 -PrivateData $PrivateData
 }
+
+# Synopsis: Update the version information in the gallery data upload file
+task UpdatePSGalleryData {
+
+}
+
+# Synopsis: Push the project to PSScriptGallery
+task PublishPSGallery {
+
+}
+
+<# Synopsis: Update module manifest with exported functions and version.
+task UpdateModuleManifest -if ($Script:Manifest -ne $null) {
+    $Script:Manifest.ModuleVersion = $Script:Version
+    $Script:Manifest.FunctionsToExport = $Script:FunctionsToExport
+
+    # There is something wrong with -privatedata when passed into new-modulemanifest. this may not really work but it at least leaves a usable psd1
+    $PrivateData = $null
+    if ($Script:Manifest.Keys -contains 'PrivateData') {
+        $PrivateData = New-Object -TypeName psobject -Property $Script:Manifest.PrivateData.PSdata
+        $Script:Manifest.Remove('PrivateData')
+    }
+    $MyManifest = $Script:Manifest
+    New-ModuleManifest @MyManifest -Path $StageReleasePath\$ModuleToBuild.psd1 -PrivateData $PrivateData
+} #>
 
 # Synopsis: Create new release version directory from our temporary build directory and copy our results
 task PublishModuleVersionRelease -If ( -not (Test-Path "$($ReleasePath)\$($Script:Version)")) {
@@ -207,13 +207,13 @@ task CreateHelp {
 	Import-Module PlatyPS
     
     # We need to import the module to give the helps functions something to work against
-    Import-Module $ModuleFullPath
+    Import-Module (Join-Path $StageReleasePath $Manifest.RootModule)
 
     # Create new html help files
-    New-MarkdownHelp -module FormatPowerShellCode -OutputFolder "$($TempPath)\docs\" -Force
+    New-MarkdownHelp -module $ModuleToBuild -OutputFolder "$($StageReleasePath)\docs\" -Force
     
     # Create external help files
-    New-ExternalHelp "$($TempPath)\docs" -OutputPath "$($TempPath)\en-US\"
+    New-ExternalHelp "$($StageReleasePath)\docs" -OutputPath "$($StageReleasePath)\en-US\"
 
     # Clean up loaded modules
     Remove-Module $ModuleToBuild
@@ -222,19 +222,19 @@ task CreateHelp {
 
 # Synopsis: Create a new version release directory for our release and copy our contents to it
 task PushVersionRelease {
-    $ThisReleasePath = "$ScriptRoot\release\$($Version)"
+    $ThisReleasePath = Join-Path $ReleasePath $Script:Version
     Remove-Item $ThisReleasePath -Force -Recurse -ErrorAction 0
     New-Item $ThisReleasePath -ItemType:Directory
-    Copy-Item -Path "$($TempPath)\*" -Destination $ThisReleasePath -Recurse
-    Out-Zip $TempPath $ReleasePath\$ModuleToBuild'-'$Version'.zip' -overwrite
+    Copy-Item -Path "$($StageReleasePath)\*" -Destination $ThisReleasePath -Recurse
+    Out-Zip $StageReleasePath $ReleasePath\$ModuleToBuild'-'$Version'.zip' -overwrite
 }
 
 # Synopsis: Create the current release directory and copy this build to it.
 task PushCurrentRelease {
     Remove-Item $CurrentReleasePath -Force -Recurse -ErrorAction 0
     New-Item $CurrentReleasePath -ItemType:Directory
-    Copy-Item -Path "$($TempPath)\*" -Destination $CurrentReleasePath -Recurse
-    Out-Zip $TempPath $ReleasePath\$ModuleToBuild'-current.zip' -overwrite
+    Copy-Item -Path "$($StageReleasePath)\*" -Destination $CurrentReleasePath -Recurse
+    Out-Zip $StageReleasePath $ReleasePath\$ModuleToBuild'-current.zip' -overwrite
 }
 <# Synopsis: Push with a version tag.
 task PushRelease Version, {
@@ -254,10 +254,7 @@ task RemoveScriptSignatures {
 
 
 # Synopsis: The default build
-task . Version, Clean, Stage, CreateHelp,  FormatCode, UpdateModuleManifest, PushVersionRelease, PushCurrentRelease, GitStatus
+task . Version, Clean, PrepareStage, FormatCode, PrepareModuleRelease, CreateHelp, PushVersionRelease, PushCurrentRelease, GitStatus
 
 # Synopsis: Test the code formatting module only
-task TestModule Version, Clean, Stage, CreateHelp, FormatCode, UpdateModuleManifest
-
-# Synopsis: Test combining the module into the temp build directory
-task TestCombine Version, Clean, StageCombine, UpdateModuleManifest
+task TestModule Version, Clean, PrepareStage, FormatCode

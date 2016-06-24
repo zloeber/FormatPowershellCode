@@ -1,17 +1,12 @@
-﻿#region Private Variables
-# Current script path
-[string]$ScriptPath = Split-Path (get-variable myinvocation -scope script).value.Mycommand.Definition -Parent
-[bool]$ThisModuleLoaded = $false
-#endregion Private Variables
-
-#region Methods
-Get-ChildItem $ScriptPath/src/private -Recurse -Filter "*.ps1" -File | Foreach { 
+﻿# This psm1 file is purely for development. The build script will recreate this file entirely.
+# Private methods and variables
+Get-ChildItem .\src\private -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
     Write-Verbose "Dot sourcing private script file: $($_.Name)"
     . $_.FullName
 }
 
-# Load and export methods
-Get-ChildItem $ScriptPath/src/public -Recurse -Filter "*.ps1" -File | Foreach { 
+# Load and export public methods
+Get-ChildItem .\src\public -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
     Write-Verbose "Dot sourcing public script file: $($_.Name)"
     . $_.FullName
 
@@ -21,14 +16,3 @@ Get-ChildItem $ScriptPath/src/public -Recurse -Filter "*.ps1" -File | Foreach {
         Export-ModuleMember $_.Name
     }
 }
-#endregion Methods
-
-#region Module Setup
-$ThisModuleLoaded = $true
-#endregion Module Setup
-
-#region Module Cleanup
-$ExecutionContext.SessionState.Module.OnRemove = {
-    # cleanup when unloading module (if any)
-}
-#endregion Module Cleanup

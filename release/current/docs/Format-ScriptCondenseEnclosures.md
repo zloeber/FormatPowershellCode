@@ -1,5 +1,5 @@
 ---
-external help file: FormatPowershellCode-help.xml
+external help file: FormatPowerShellCode-help.xml
 schema: 2.0.0
 ---
 
@@ -57,7 +57,7 @@ Aliases:
 
 Required: False
 Position: 2
-Default value: @('{','(','@{','@(')
+Default value: 
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

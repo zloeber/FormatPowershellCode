@@ -3,18 +3,18 @@ external help file: FormatPowerShellCode-help.xml
 schema: 2.0.0
 ---
 
-# Format-ScriptPadOperators
+# Get-TokensBetweenLines
 ## SYNOPSIS
-Pads powershell assignment operators with single spaces.
+Supplemental function used to get all tokens between the lines requested.
 
 ## SYNTAX
 
 ```
-Format-ScriptPadOperators [-Code] <String[]> [-SkipPostProcessingValidityCheck]
+Get-TokensBetweenLines [-Code <String[]>] [-Start] <Int32> [-End] <Int32>
 ```
 
 ## DESCRIPTION
-Pads powershell assignment operators with single spaces.
+Supplemental function used to get all tokens between the lines requested.
 
 ## EXAMPLES
 
@@ -24,44 +24,56 @@ $testfile = 'C:\temp\test.ps1'
 ```
 
 PS \> $test = Get-Content $testfile -raw
-PS \> $test | Format-ScriptPadOperators | clip
+PS \> $test | Get-TokensBetweenLines -Start 47 -End 47
 
 Description
 -----------
-Takes C:\temp\test.ps1 as input, spaced all assignment operators and puts the result in the clipboard 
-to be pasted elsewhere for review.
+Takes C:\temp\test.ps1 as input, and returns all tokens on line 47.
 
 ## PARAMETERS
 
 ### -Code
-Multi-line or piped lines of code to process.
+Multiline or piped lines of code to process.
 
 ```yaml
 Type: String[]
 Parameter Sets: (All)
 Aliases: 
 
-Required: True
-Position: 1
+Required: False
+Position: Named
 Default value: 
 Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -SkipPostProcessingValidityCheck
-After modifications have been made a check will be performed that the code has no errors.
-Use this switch to bypass this check 
-\(This is not recommended!\)
+### -Start
+Start line to search
 
 ```yaml
-Type: SwitchParameter
+Type: Int32
 Parameter Sets: (All)
 Aliases: 
 
-Required: False
+Required: True
 Position: 2
-Default value: False
-Accept pipeline input: False
+Default value: 0
+Accept pipeline input: True (ByValue)
+Accept wildcard characters: False
+```
+
+### -End
+End line to search
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases: 
+
+Required: True
+Position: 3
+Default value: 0
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 

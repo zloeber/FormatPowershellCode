@@ -3,18 +3,18 @@ external help file: FormatPowerShellCode-help.xml
 schema: 2.0.0
 ---
 
-# Format-ScriptPadOperators
+# Format-ScriptGetKindLines
 ## SYNOPSIS
-Pads powershell assignment operators with single spaces.
+Supplemental function used to get line location of different kinds of AST tokens in a script.
 
 ## SYNTAX
 
 ```
-Format-ScriptPadOperators [-Code] <String[]> [-SkipPostProcessingValidityCheck]
+Format-ScriptGetKindLines [[-Code] <String[]>] [[-Kind] <String>]
 ```
 
 ## DESCRIPTION
-Pads powershell assignment operators with single spaces.
+Supplemental function used to get line location of different kinds of AST tokens in a script.
 
 ## EXAMPLES
 
@@ -24,43 +24,41 @@ $testfile = 'C:\temp\test.ps1'
 ```
 
 PS \> $test = Get-Content $testfile -raw
-PS \> $test | Format-ScriptPadOperators | clip
+PS \> $test | Format-ScriptGetKindLines -Kind "HereString*" | clip
 
 Description
 -----------
-Takes C:\temp\test.ps1 as input, spaced all assignment operators and puts the result in the clipboard 
+Takes C:\temp\test.ps1 as input, formats as the function defines and places the result in the clipboard 
 to be pasted elsewhere for review.
 
 ## PARAMETERS
 
 ### -Code
-Multi-line or piped lines of code to process.
+Multiline or piped lines of code to process.
 
 ```yaml
 Type: String[]
 Parameter Sets: (All)
 Aliases: 
 
-Required: True
+Required: False
 Position: 1
 Default value: 
 Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
-### -SkipPostProcessingValidityCheck
-After modifications have been made a check will be performed that the code has no errors.
-Use this switch to bypass this check 
-\(This is not recommended!\)
+### -Kind
+Type of AST kind to retrieve.
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases: 
 
 Required: False
 Position: 2
-Default value: False
+Default value: 
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
