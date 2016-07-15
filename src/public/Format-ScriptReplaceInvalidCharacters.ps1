@@ -31,6 +31,10 @@
 
        Version History
        1.0.0 - Initial release
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(

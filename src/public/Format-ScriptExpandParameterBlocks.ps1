@@ -1,4 +1,4 @@
-﻿function Format-ScriptExpandParameterBlocks {
+﻿ function Format-ScriptExpandParameterBlocks {
     <#
     .SYNOPSIS
         Expand any parameter blocks from inline to a more readable format.
@@ -29,6 +29,10 @@
        1.0.0 - Initial release
        1.0.1 - fixed logic for embedded parameter blocks, added more verbose output.
        1.0.1 - Fixed instance where parameter types were being shortened.
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(
@@ -125,9 +129,9 @@
                             $NewParamBlock += '    ' + $_.Extent.Text + "`r`n"
                         }
                         # switch parameter types don't seem to have an easily grabbable type accelerator shortcut from AST :(
-                        if ($CurrParam.Statictype.Name -eq 'SwitchParameter') { 
+                        if ($CurrParam.Statictype.Name -eq 'SwitchParameter') {
                             $ParamType = 'switch'
-                        } 
+                        }
                         else {
                             $ParamType =  $CurrParamType
                         }
@@ -138,6 +142,9 @@
                         }
                         else {
                             $NewParamBlock += '    ' + $CurrParam.Name.Extent.Text
+                        }
+                        if (-not [string]::IsNullOrEmpty($CurrParam.DefaultValue)) {
+                            $NewParamBlock += ' = ' + $currparam.DefaultValue.Extent.Text
                         }
                         if ($t2 -lt ($AllParams.Count - 1)) {
                             $NewParamBlock += ','

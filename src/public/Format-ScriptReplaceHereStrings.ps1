@@ -29,6 +29,10 @@
        1.0.0 - Initial release
        1.0.1 - Fixed some replacements based on if the string is expandable or not.
              - Changed output to be all one assignment rather than multiple assignments
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(

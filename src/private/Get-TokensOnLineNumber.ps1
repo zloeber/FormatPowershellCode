@@ -13,7 +13,6 @@
         $AllTokens += $Tokens
     }
     end {
-        $AllTokens | Where {($_.Extent.StartLineNumber -eq $_.Extent.EndLineNumber) -and 
-        ($_.Extent.StartLineNumber -eq $LineNumber)}
+        $AllTokens | Where {($_.Extent.StartLineNumber -eq $_.Extent.EndLineNumber) -and ($_.Extent.StartLineNumber -eq $LineNumber)}
     }
 }

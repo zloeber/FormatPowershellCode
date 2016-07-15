@@ -9,8 +9,7 @@
     .PARAMETER EnclosureStart
         Array of starting enclosure characters to process (default is (, {, @(, and @{)
     .PARAMETER SkipPostProcessingValidityCheck
-        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check 
-        (This is not recommended!)
+        After modifications have been made a check will be performed that the code has no errors. Use this switch to bypass this check (This is not recommended!)
     .EXAMPLE
         $test = Get-Content -Raw -Path 'C:\testcases\test-pad-operators.ps1'
         $test | Format-ScriptCondenseEnclosures | clip
@@ -27,6 +26,10 @@
 
         1.0.0 - 01/25/2015
         - Initial release
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(

@@ -30,6 +30,10 @@
        1.0.0 - Initial release
        1.0.1 - Fixed improper handling of ? alias
              - Added more verbose output
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
 
     [CmdletBinding()]

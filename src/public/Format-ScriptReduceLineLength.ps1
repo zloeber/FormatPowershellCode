@@ -28,6 +28,10 @@
 
        Version History
        1.0.0 - Initial release
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(
@@ -52,7 +56,8 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
+        # Note: I purposefully leave the extra carriage return on $ScriptText to get around an issue with a single line script being passed
+        $ScriptText = $Codeblock | Out-String
         Write-Verbose "$($FunctionName): Attempting to parse AST."
         $AST = [System.Management.Automation.Language.Parser]::ParseInput($ScriptText, [ref]$Tokens, [ref]$ParseError) 
  
@@ -81,8 +86,11 @@
                     $PaddingLength = 0
                 }
                 $AdjustedLineLength = $Length - $PaddingLength
-                $AllTokensOnLine = $Tokens | Get-TokensOnLineNumber -LineNumber ($t+1)
-                $BreakableTokens = @($AllTokensOnLine | Get-BreakableTokens)
+                $BreakableTokens = @()
+                if ($Tokens -ne $null) {
+                    $AllTokensOnLine = $Tokens | Get-TokensOnLineNumber -LineNumber ($t+1)
+                    $BreakableTokens = @($AllTokensOnLine | Get-BreakableTokens)
+                }
                 $DesiredBreakPoints = [Math]::Round($SplitScriptText[$t].Length / $AdjustedLineLength)
                 if ($BreakableTokens.Count -gt 0) {
                     Write-Debug "$($FunctionName): Total String Length: $($CurrentLineLength)"

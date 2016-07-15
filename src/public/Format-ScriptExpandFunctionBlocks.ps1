@@ -34,6 +34,11 @@
 
        Version History
        1.0.0 - Initial release
+       1.0.1 - Fixed awful bug that spit out code without the function declaration (whoops)
+    .LINK
+        https://github.com/zloeber/FormatPowershellCode
+    .LINK
+        http://www.the-little-things.net
     #>
     [CmdletBinding()]
     param(
@@ -93,10 +98,10 @@
             $RemoveStart = $Blocks[$t].Extent.StartOffset
             $RemoveEnd = $Blocks[$t].Extent.EndOffset - $RemoveStart
             if (($codelinecount -le 1) -and $DontExpandSingleLineBlocks) {
-                $NewExtent = [string]($Blocks[$t].Name) + $Params + "`r`n{ " + $InnerBlock + " }"
+                $NewExtent = 'Function ' + [string]($Blocks[$t].Name) + $Params + "`r`n{ " + $InnerBlock + " }"
             }
             else {
-                $NewExtent = [string]($Blocks[$t].Name) + $Params + "`r`n{`r`n" + $InnerBlock + "`r`n}"
+                $NewExtent = 'Function ' + [string]($Blocks[$t].Name) + $Params + "`r`n{`r`n" + $InnerBlock + "`r`n}"
             }
             $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$NewExtent)
             Write-Verbose "$($FunctionName): Processing function $($Blocks[$t].Name)"

@@ -205,9 +205,21 @@ I've also added the technique(s) used in the function for parsing the code. I've
 
 ==TBD==
 
+##Installing
+You can download and the current release of this script from [here](https://github.com/zloeber/FormatPowershellCode/raw/master/release/FormatPowershellCode-current.zip). Extract it into a folder called FormatPowershellCode in your modules directory.
+
+Additionally you can install the current release of this module with PowerShellGet (in 5.0)
+
+`Install-Module FormatPowershellCode`
+
+Or you can use [this hack(ish) script](https://raw.githubusercontent.com/zloeber/FormatPowershellCode/master/Install.ps1) to install the module but I don't really maintain or test this script out so use at your own discretion.
+
 ##Credits
 [Haroopad](http://pad.haroopress.com/) - Sweet Markdown Editor
 
 [PowerShell Practice and Style](https://github.com/PoshCode/PowerShellPracticeAndStyle)
+
+[Invoke-Build](https://github.com/nightroman/Invoke-Build) - A kick ass build automation tool written in PowerShell
+
 
 
