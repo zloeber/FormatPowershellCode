@@ -31,19 +31,26 @@
         .psgallery - File containing information for pushing module to psgallery
         version.txt - Used to determine version of build to create (all versions will overwrite the 'current' release folder)
 
-    To run the build:
+    To run the basic build:
         .\build.ps1
+    
+    To update your project version number (basically update your module manifest automatically) first update the version.txt file then run:
+        Import-Module InvokeBuild
+        Invoke-Build UpdateVersion
+
+    To publish to the PSGallery site (assuming you have a filled out galleryapi.txt file in your profile path)
+        Import-Module InvokeBuild
+        Invoke-Build PublishPSGallery -ReleaseNotes 'First real release'
 
     Notes:
-    - The public functions are based on the name of the files within the /src/public folder
-    - This build is based on your existing module being loaded as it is and will infer information from it to build the final release
+    - The manifest file is assumed to already exist but it doesn't matter if it is exporting every function. When it is recreated only 'public' functions will be defined.
+    - This build is based on your existing module being loaded as it is and will infer information from it to build the final release module.
     - The release number is driven by the version.txt file in the root of your module project directory. You can update the exising module
-      manifest in this directory with this version with:
-        Invoke-Build UpdateVersion
+      manifest in this directory with this version with some additional invoke-build tasks.
     - I use powershellget to ease installation of required modules. This will have to be rewritten in several spots to attain any kind of 
-      backward compatibility.
+      backward compatibility from PowerShell 5.0
     - There is no real accounting for exported variables, aliases, or other public content in this script. The manifest will copy over manually defined
-      items like this but you 
+      items like this though. 
 
 #>
 if ((get-module InvokeBuild -ListAvailable) -eq $null) {

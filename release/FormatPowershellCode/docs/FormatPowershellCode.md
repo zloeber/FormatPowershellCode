@@ -1,8 +1,8 @@
 ﻿---
 Module Name: FormatPowershellCode
 Module Guid: dcfbce3c-18be-4775-b98d-4431d4fb9e08
-Download Help Link: https://github.com/zloeber/FormatPowershellCode/release/release/current/docs/FormatPowershellCode.md
-Help Version: 0.1.0
+Download Help Link: https://github.com/zloeber/FormatPowershellCode/release/FormatPowershellCode/docs/FormatPowershellCode.md
+Help Version: 1.4.0
 Locale: en-US
 ---
 

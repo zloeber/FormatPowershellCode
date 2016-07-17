@@ -12,7 +12,7 @@
 RootModule = 'FormatPowerShellCode.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.1.0'
+ModuleVersion = '1.4.0'
 
 # ID used to uniquely identify this module
 GUID = 'dcfbce3c-18be-4775-b98d-4431d4fb9e08'
@@ -24,7 +24,7 @@ Author = 'Zachary Loeber'
 CompanyName = 'None'
 
 # Copyright statement for this module
-Copyright = '(c) 2015 Zachary Loeber. All rights reserved.'
+Copyright = '(c) 2016 Zachary Loeber. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'A set of functions for standardizing and reformatting PowerShell script code.'
@@ -96,7 +96,7 @@ PrivateData = @{
         Tags = @('powershell', 'syntax', 'AST', 'beautifier')
 
         # A URL to the license for this module.
-        LicenseUri = 'https://opensource.org/licenses/ISC'
+        LicenseUri = 'https://github.com/zloeber/FormatPowershellCode/blob/master/LICENSE.md'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/zloeber/FormatPowershellCode'
@@ -106,8 +106,6 @@ PrivateData = @{
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
-
-        IsPrerelease = 'True'
 
     } # End of PSData hashtable
 

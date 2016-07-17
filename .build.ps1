@@ -1,4 +1,8 @@
-﻿# Update these to suit your build
+﻿param (
+	[string]$ReleaseNotes = $null
+)
+
+# Update these to suit your PowerShell module build
 # The module we are building
 $ModuleToBuild = 'FormatPowershellCode'
 
@@ -14,9 +18,10 @@ $PrivateFunctionSource = 'src\private'
 # Other module source
 $OtherModuleSource = 'src\other'
 
-# Release directories
+# Release directory. You typically want a module to reside in a folder of the same name in order to publish to psgallery
+# among other things.
 $BaseReleaseFolder = 'release'
-$CurrentReleaseFolder = 'current'
+$CurrentReleaseFolder = $ModuleToBuild
 
 # Build tool path (these scripts are dot sourced)
 $BuildToolFolder = 'build'
@@ -24,8 +29,7 @@ $BuildToolFolder = 'build'
 # Scratch path - this is where all our scratch work occurs. It will be cleared out at every run.
 $ScratchFolder = 'temp'
 
-# Generally leave these alone
-# Build out our full paths
+# Put together our full paths. Generally leave these alone
 $ModuleFullPath = (Get-Item "$($ModuleToBuild).psm1").FullName
 $ScriptRoot = Split-Path $ModuleFullPath
 $ScratchPath = Join-Path $ScriptRoot $ScratchFolder
@@ -40,7 +44,7 @@ $BuildToolPath = Join-Path $ScriptRoot $BuildToolFolder
 # The required file containing our current working build version
 $VersionFile = "$($ScriptRoot)\version.txt"
 
-# These are required for a full build process and will be automatically installed if they aren't
+# These are required for a full build process and will be automatically installed if they aren't available
 $RequiredModules = @('PlatyPS','PSScriptAnalyzer')
 
 # Used later to determine if we are in a configured state or not
@@ -52,7 +56,6 @@ $ExternalHelp = @"
     .EXTERNALHELP $($ModuleToBuild)-help.xml
     #>
 "@
-#endregion
 
 #Synopsis: Validate system requirements are met
 task ValidateRequirements {
@@ -108,7 +111,6 @@ task LoadModuleManifest {
     # Store this for later
     $Script:ReleaseModule = Join-Path $StageReleasePath $Script:Manifest.RootModule
     Write-Host -ForegroundColor Green '...Loaded!'
-
 }
 
 # Synopsis: Create new module manifest
@@ -134,7 +136,9 @@ task CreateModuleManifest -After CreateModulePSM1 {
     $NewPrivateDataString += '  PSData = '
     $NewPrivateDataString += (Convert-HashToString $tempPSData) 
     $NewPrivateDataString +=  "`r`n}"
+
     # We do this because private data never seems to give the results I want in the manifest file
+    # Later we replace the whole string in the manifest with what we want.
     $Script:Manifest.PrivateData = ''
 
     # Remove some hash elements which cannot be passed to new-modulemanifest
@@ -150,8 +154,8 @@ task CreateModuleManifest -After CreateModulePSM1 {
     $MyManifest = $Script:Manifest
     New-ModuleManifest @MyManifest -Path $StageReleasePath\$ModuleToBuild.psd1
 
+    # Replace the whole private data section with our own string instead
     Replace-FileString -Pattern "PrivateData = ''"  $NewPrivateDataString $StageReleasePath\$ModuleToBuild.psd1 -Overwrite -Encoding 'UTF8'
-
 }
 
 # Synopsis: Load the module project
@@ -175,7 +179,7 @@ task Version {
     Write-Host -ForegroundColor Green '...Yup!'
 }
 
-#Synopsis: Validate script requirements are met, load required modules, and load build tools.
+#Synopsis: Validate script requirements are met, load required modules, load project manifest and module, and load additional build tools.
 task Configure ValidateRequirements, LoadRequiredModules, LoadModuleManifest, LoadModule, Version, LoadBuildTools, {
     # If we made it this far then we are configured!
     $Script:IsConfigured = $True
@@ -203,15 +207,15 @@ task UpdateVersion LoadBuildTools, LoadModuleManifest, LoadModule, (job Version 
     }
 }
 
-# Synopsis: Remove/regenerate temp staging directory
+# Synopsis: Remove/regenerate scratch staging directory
 task Clean {
 	$null = Remove-Item $ScratchPath -Force -Recurse -ErrorAction 0
     $null = New-Item $ScratchPath -ItemType:Directory
-    Write-Host -NoNewLine "      Clean up our temporary build directory at $($ScratchPath)" 
+    Write-Host -NoNewLine "      Clean up our scratch/staging directory at $($ScratchPath)" 
     Write-Host -ForegroundColor Green '...Complete!'
 }
 
-# Synopsis: Create base content tree in staging area
+# Synopsis: Create base content tree in scratch staging area
 task PrepareStage {
     # Create the directories
     $null = New-Item "$($ScratchPath)\src" -ItemType:Directory -Force
@@ -223,19 +227,22 @@ task PrepareStage {
     Copy-Item -Path "$($ScriptRoot)\$($PrivateFunctionSource)" -Recurse -Destination "$($ScratchPath)\$($PrivateFunctionSource)"
     Copy-Item -Path "$($ScriptRoot)\$($OtherModuleSource)" -Recurse -Destination "$($ScratchPath)\$($OtherModuleSource)"
     Copy-Item -Path "$($ScriptRoot)\en-US" -Recurse -Destination $ScratchPath
-        
-    # Collect a list of our public methods for later module manifest updates
-    #$Script:FunctionsToExport = (Get-ChildItem -Path $ScratchPath\$($PublicFunctionSource)).BaseName
 }, GetPublicFunctions
 
 # Synopsis:  Collect a list of our public methods for later module manifest updates
 task GetPublicFunctions {
-    $Script:FunctionsToExport = (Get-ChildItem -Path $ScriptRoot\$($PublicFunctionSource)).BaseName | foreach {$_.ToString()}
+    $Exported = @()
+    Get-ChildItem "$($ScriptRoot)\$($PublicFunctionSource)" -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
+       $Exported += ([System.Management.Automation.Language.Parser]::ParseInput((Get-Content -Path $_.FullName -Raw), [ref]$null, [ref]$null)).FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $false) | Foreach {$_.Name}
+    }
+    # $Script:FunctionsToExport = (Get-ChildItem -Path $ScriptRoot\$($PublicFunctionSource)).BaseName | foreach {$_.ToString()}
+    $Script:FunctionsToExport = $Exported
+    Write-Host -NoNewLine '      Parsing for public (exported) function names'
+    Write-Host -ForegroundColor Green '...Complete!'
 }
 
 # Synopsis: Assemble the module for release
 task CreateModulePSM1 {
-
     $CombineFiles = "## OTHER MODULE FUNCTIONS AND DATA ##`r`n`r`n"
     Write-Host "      Other Source Files: $($ScratchPath)\$($OtherModuleSource)"
     Get-childitem  (Join-Path $ScratchPath "$($OtherModuleSource)\*.ps1") | foreach {
@@ -332,14 +339,6 @@ task AnalyzeScript -After CreateModulePSM1 {
     Write-Host "          Script Analysis Informational = $($AnalysisInfo.Count)"
 }
 
-# Synopsis: Update the version information in the gallery data upload file
-task UpdatePSGalleryData {
-}
-
-# Synopsis: Push the project to PSScriptGallery
-task PublishPSGallery {
-}
-
 # Synopsis: Create new release version directory from our temporary build directory and copy our results
 task PublishModuleVersionRelease -If {-not (Test-Path "$($ReleasePath)\$($Script:Version)")} {
     Write-Output "      Creating version release at - $($ReleasePath)\$($Script:Version)"
@@ -362,7 +361,7 @@ task TestCreateHelp Configure, CreateMarkdownHelp, CreateExternalHelp, CreateUpd
 # Synopsis: Build the markdown help files with PlatyPS
 task CreateMarkdownHelp GetPublicFunctions, {
     $OnlineModuleLocation = "$($ModuleWebsite)/$($BaseReleaseFolder)"
-    $FwLink = "$($OnlineModuleLocation)/release/current/docs/$($ModuleToBuild).md"
+    $FwLink = "$($OnlineModuleLocation)/$($CurrentReleaseFolder)/docs/$($ModuleToBuild).md"
     $ModulePage = "$($StageReleasePath)\docs\$($ModuleToBuild).md"
     
     # Create the .md files and the generic module page md as well
@@ -414,17 +413,6 @@ task CreateUpdateableHelpCAB {
     Write-Host -ForeGroundColor green '...Complete!'
 }
 
-# Synopsis: Remove session artifacts like loaded modules and variables
-task BuildSessionCleanup {
-    # Clean up loaded modules if they are loaded
-    $RequiredModules | Foreach {
-        Write-Output "      Removing $($_) module (if loaded)."
-        Remove-Module $_  -Erroraction Ignore
-    }
-    Write-Output "      Removing $ModuleToBuild module  (if loaded)."
-    Remove-Module $ModuleToBuild -Erroraction Ignore
-}
-
 # Synopsis: Create a new version release directory for our release and copy our contents to it
 task PushVersionRelease {
     $ThisReleasePath = Join-Path $ReleasePath $Script:Version
@@ -454,6 +442,53 @@ task GitPushRelease Version, {
 	exec { git push }
 	exec { git tag -a "v$Version" -m "v$Version" }
 	exec { git push origin "v$Version" }
+}
+
+# Synopsis: Update the psgallery project profile data file
+task UpdatePSGalleryProfile Configure, {
+    $PSGallaryParams = @{}
+    $PSGallaryParams.Path = "$($CurrentReleasePath)"
+    $PSGallaryParams.ProjectUri = $ModuleWebsite
+    If ($ReleaseNotes -ne $null) {
+        $PSGallaryParams.ReleaseNotes = $ReleaseNotes
+    }
+    
+    # Update our gallary data with any tags from the manifest file (if they exist)
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'Tags') {
+        $PSGallaryParams.Tags  = ($Script:Manifest.PrivateData.PSData.Tags | Foreach {$_}) -join ','
+    }
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'LicenseUri') {
+        if ($Script:Manifest.PrivateData.PSData.LicenseUri -ne $null) {
+            $PSGallaryParams.LicenseUri = $Script:Manifest.PrivateData.PSData.LicenseUri
+        }
+    }
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'IconUri') {
+        if ($Script:Manifest.PrivateData.PSData.IconUri -ne $null) {
+            $PSGallaryParams.IconUri = $Script:Manifest.PrivateData.PSData.IconUri
+        }
+    }
+
+    Update-PSGalleryProjectProfile @PSGallaryParams
+    Write-Host -NoNewLine "      Updating .psgallery profile"
+    Write-Host -ForeGroundColor green '...Complete!'
+}
+
+# Synopsis: Push the project to PSScriptGallery
+task PublishPSGallery UpdatePSGalleryProfile, {
+    Upload-ProjectToPSGallery
+    Write-Host -NoNewLine "      Uploading project to PSGallery"
+    Write-Host -ForeGroundColor green '...Complete!'
+}
+
+# Synopsis: Remove session artifacts like loaded modules and variables
+task BuildSessionCleanup {
+    # Clean up loaded modules if they are loaded
+    $RequiredModules | Foreach {
+        Write-Output "      Removing $($_) module (if loaded)."
+        Remove-Module $_  -Erroraction Ignore
+    }
+    Write-Output "      Removing $ModuleToBuild module  (if loaded)."
+    Remove-Module $ModuleToBuild -Erroraction Ignore
 }
 
 # Synopsis: The default build
