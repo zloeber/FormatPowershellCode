@@ -188,7 +188,7 @@ task Configure ValidateRequirements, LoadRequiredModules, LoadModuleManifest, Lo
 }
 
 # Synopsis: Update current module manifest with the version defined in version.txt if they differ
-task UpdateVersion LoadBuildTools, LoadModuleManifest, LoadModule, (job Version -Safe), LoadBuildTools, {
+task UpdateVersion LoadBuildTools, LoadModuleManifest, LoadModule, (job Version -Safe), {
     assert ($Script:Version -ne $null) 'Unable to pull a version from version.txt!'
     if (error Version) {
         $ModVer = .{switch -Regex -File $ModuleManifestFullPath {"ModuleVersion\s+=\s+'(\d+\.\d+\.\d+)'" {return $Matches[1]}}}
@@ -273,16 +273,23 @@ task CreateModulePSM1 {
     Set-Content $Script:ReleaseModule ($CombineFiles) -Encoding UTF8
     Write-Host -NoNewLine '      Combining module functions and data into one PSM1 file'
     Write-Host -ForegroundColor Green '...Complete!'
+}
 
-    # Copy over documentation last
-    Copy-Item -Path "$($ScratchPath)\en-US" -Recurse -Destination $StageReleasePath -Force
+# Synopsis: Copy over the source and psm module without modification
+task CopyModulePSM1 {
+    Copy-Item -Path (Join-Path $ScratchPath "$($OtherModuleSource)\*.ps1") -Recurse -Destination $StageReleasePath -Force
+    Copy-Item -Path (Join-Path $ScratchPath "$($PrivateFunctionSource)\*.ps1") -Recurse -Destination $StageReleasePath -Force
+    Copy-Item -Path (Join-Path $ScratchPath "$($PublicFunctionSource)\*.ps1") -Recurse -Destination $StageReleasePath -Force
+    Copy-Item -Path (Join-Path $ScratchPath "$($ModuleToBuild).psm1") -Destination $StageReleasePath -Force
+    Write-Host -NoNewLine '      Copy over source and psm1 files'
+    Write-Host -ForegroundColor Green '...Complete!'
 }
 
 # Synopsis: Warn about not empty git status if .git exists.
 task GitStatus -If (Test-Path .git) {
 	$status = exec { git status -s }
 	if ($status) {
-		Write-Warning "Git status: $($status -join ', ')"
+		Write-Warning "      Git status: $($status -join ', ')"
 	}
 }
 
@@ -339,13 +346,6 @@ task AnalyzeScript -After CreateModulePSM1 {
     Write-Host "          Script Analysis Informational = $($AnalysisInfo.Count)"
 }
 
-# Synopsis: Create new release version directory from our temporary build directory and copy our results
-task PublishModuleVersionRelease -If {-not (Test-Path "$($ReleasePath)\$($Script:Version)")} {
-    Write-Output "      Creating version release at - $($ReleasePath)\$($Script:Version)"
-    $null = New-Item "$($ReleasePath)\$($Script:Version)" -ItemType:Directory
-    Copy-Item $ScratchPath -Destination "$($ReleasePath)\$($Script:Version)" -Recurse
-}
-
 # Synopsis: Build help files for module
 task CreateHelp CreateMarkdownHelp, CreateExternalHelp, CreateUpdateableHelpCAB, {
     Write-Host -NoNewLine '      Create help files' 
@@ -360,6 +360,9 @@ task TestCreateHelp Configure, CreateMarkdownHelp, CreateExternalHelp, CreateUpd
 
 # Synopsis: Build the markdown help files with PlatyPS
 task CreateMarkdownHelp GetPublicFunctions, {
+    # First copy over documentation
+    Copy-Item -Path "$($ScratchPath)\en-US" -Recurse -Destination $StageReleasePath -Force
+
     $OnlineModuleLocation = "$($ModuleWebsite)/$($BaseReleaseFolder)"
     $FwLink = "$($OnlineModuleLocation)/$($CurrentReleaseFolder)/docs/$($ModuleToBuild).md"
     $ModulePage = "$($StageReleasePath)\docs\$($ModuleToBuild).md"
@@ -405,7 +408,7 @@ task CreateExternalHelp {
     Write-Host -ForeGroundColor green '...Complete!'
 }
 
-# Synopsis: Build the markdown help files with PlatyPS
+# Synopsis: Build the help file CAB with PlatyPS
 task CreateUpdateableHelpCAB {
     Write-Host -NoNewLine "      Creating updateable help cab file"
     $LandingPage = "$($StageReleasePath)\docs\$($ModuleToBuild).md"
@@ -437,11 +440,11 @@ task PushCurrentRelease {
 # Synopsis: Push with a version tag.
 task GitPushRelease Version, {
 	$changes = exec { git status --short }
-	assert (!$changes) "Please, commit changes."
+	assert (-not $changes) "Please, commit changes."
 
 	exec { git push }
-	exec { git tag -a "v$Version" -m "v$Version" }
-	exec { git push origin "v$Version" }
+	exec { git tag -a "v$($Script:Version)" -m "v$($Script:Version)" }
+	exec { git push origin "v$($Script:Version)" }
 }
 
 # Synopsis: Update the psgallery project profile data file
@@ -499,6 +502,29 @@ task . `
         FormatCode,
         CreateHelp,
         CreateModulePSM1, 
+        PushVersionRelease, 
+        PushCurrentRelease, 
+        BuildSessionCleanup
+
+# Synopsis: Build without code formatting
+task BuildWithoutCodeFormatting `
+        Configure, 
+	    Clean, 
+        PrepareStage, 
+        CreateHelp,
+        CreateModulePSM1, 
+        PushVersionRelease, 
+        PushCurrentRelease, 
+        BuildSessionCleanup
+
+# Synopsis: Build module without combining source files
+task BuildWithoutCombiningSource `
+        Configure, 
+	    Clean, 
+        PrepareStage, 
+        FormatCode,
+        CreateHelp,
+        CopyModulePSM1, 
         PushVersionRelease, 
         PushCurrentRelease, 
         BuildSessionCleanup

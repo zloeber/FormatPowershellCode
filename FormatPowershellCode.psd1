@@ -12,7 +12,7 @@
 RootModule = 'FormatPowerShellCode.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.4.0'
+ModuleVersion = '1.4.1'
 
 # ID used to uniquely identify this module
 GUID = 'dcfbce3c-18be-4775-b98d-4431d4fb9e08'

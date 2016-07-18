@@ -50,7 +50,7 @@
     - I use powershellget to ease installation of required modules. This will have to be rewritten in several spots to attain any kind of 
       backward compatibility from PowerShell 5.0
     - There is no real accounting for exported variables, aliases, or other public content in this script. The manifest will copy over manually defined
-      items like this though. 
+      items in the manifest though.. 
 
 #>
 if ((get-module InvokeBuild -ListAvailable) -eq $null) {
