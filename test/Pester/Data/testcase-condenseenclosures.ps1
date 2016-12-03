@@ -1,20 +1,35 @@
 #comment string
 "Code string"
-if($true) #comment
+if($true){ #comment
 
 
+
+
+
+	"True"
+}
+
+$array =#here is comment string
+<# array entries #>
+
+@(
+
+"Test1",
+"TEst2"
+)
+function Test
 
 
 
 {
-	"True"
+
+
+$a=
+
+(
+"Working"
+)
+$a
 }
 
-$array = 
-<# array entries #>
-
-
-@(
-"Test1",
-"TEst2"
-)
+Test
