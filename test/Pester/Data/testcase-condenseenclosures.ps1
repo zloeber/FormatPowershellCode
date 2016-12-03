@@ -1,7 +1,7 @@
 #comment string
 "Code string"
-if($true){ #comment
-
+if($true) #comment
+{
 
 
 

@@ -53,26 +53,25 @@
         $Output = @()
         $Count = 0
         $LineCount = 0
+        $codeLine = 0
+        $codeColumn = 0
     }
     process {
         $Codeblock += $Code
     }
     end {
        $ScriptText = ($Codeblock | Out-String).trim([System.Environment]::NewLine)
-        try
-        {
+        try {
             $KindLines = @($ScriptText | Format-ScriptGetKindLines -Kind "HereString*")
             $KindLines += @($ScriptText | Format-ScriptGetKindLines  -Kind 'Comment')
         }
-        catch
-        {
+        catch {
             throw "$($FunctionName): Unable to properly parse the code for herestrings/comments..."
         }
         ($Codeblock -split [System.Environment]::NewLine)  | Foreach {
             $LineCount++
             
-            if (($_ -match $regex) -and ($Count -gt 0))
-            {
+            if (($_ -match $regex) -and ($Count -gt 0)) {
                 $encfound = $Matches[1]
                 Write-Verbose "$($FunctionName): Condensed enclosure $($encfound) at line $LineCount"
 
@@ -84,8 +83,7 @@
                     $Output[$codeLine] = $Output[$codeLine].Insert($Output[$codeLine].Length,$encfound)
                 }
             }
-            else
-            {
+            else {
                 $tokens=[System.Management.Automation.PSParser]::Tokenize($_,[ref]$null)
 
                 # Get line and column to put enclosure in
