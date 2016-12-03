@@ -1,3 +1,32 @@
+<#
+.SYNOPSIS
+    Converts array to a Powershell string representing the array as a codeblock.
+.DESCRIPTION
+    Converts array to a Powershell string representing the array as a codeblock.
+.PARAMETER Array
+    Array to convert.
+.PARAMETER Flatten
+    No newlines in output.
+.EXAMPLE
+    $test = @('a','b','c')
+    Convert-ArrayToString $test
+
+    Description
+    -----------
+    Outputs the following to the screen:
+    @(
+        'a',
+        'b',
+        'c'
+    )
+
+.NOTES
+    None
+.LINK
+    None
+.LINK
+    None
+#>
 function Script:Convert-ArrayToString
 {
 [cmdletbinding()]

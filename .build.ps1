@@ -2,32 +2,15 @@
 	[string]$ReleaseNotes = $null
 )
 
-# Update these to suit your PowerShell module build
-# The module we are building
-$ModuleToBuild = 'FormatPowershellCode'
+if (Test-Path '.\build\.buildenvironment.ps1') {
+    . '.\build\.buildenvironment.ps1'
+}
+else {
+    Write-Error "Without a build environment file we are at a loss as to what to do!"
+}
 
-# Project website (used for external help cab file definition)
-$ModuleWebsite = 'https://github.com/zloeber/FormatPowershellCode'
-
-# Public functions (to be exported by file name as the function name)
-$PublicFunctionSource = 'src\public'
-
-# Private function source
-$PrivateFunctionSource = 'src\private'
-
-# Other module source
-$OtherModuleSource = 'src\other'
-
-# Release directory. You typically want a module to reside in a folder of the same name in order to publish to psgallery
-# among other things.
-$BaseReleaseFolder = 'release'
+# You really shouldn't change this for a powershell module (if you want it to publish to the psgallery correctly)
 $CurrentReleaseFolder = $ModuleToBuild
-
-# Build tool path (these scripts are dot sourced)
-$BuildToolFolder = 'build'
-
-# Scratch path - this is where all our scratch work occurs. It will be cleared out at every run.
-$ScratchFolder = 'temp'
 
 # Put together our full paths. Generally leave these alone
 $ModuleFullPath = (Get-Item "$($ModuleToBuild).psm1").FullName
@@ -445,6 +428,50 @@ task GitPushRelease Version, {
 	exec { git push }
 	exec { git tag -a "v$($Script:Version)" -m "v$($Script:Version)" }
 	exec { git push origin "v$($Script:Version)" }
+}
+
+# Synopsis: Push to github
+task GithubPush Version, {
+    exec { git add . }
+    if ($ReleaseNotes -ne $null) {
+        exec { git commit -m "$ReleaseNotes"}
+    }
+    else {
+        exec { git commit -m "$($Script:Version)"}
+    }
+    exec { git push origin master }
+	$changes = exec { git status --short }
+	assert (-not $changes) "Please, commit changes."
+}
+
+# Synopsis: Create a new .psgallery project profile file (.psgallery)
+task NewPSGalleryProfile Configure, {
+    $PSGallaryParams = @{}
+    $PSGallaryParams.Path = "$($CurrentReleasePath)"
+    $PSGallaryParams.ProjectUri = $ModuleWebsite
+    If ($ReleaseNotes -ne $null) {
+        $PSGallaryParams.ReleaseNotes = $ReleaseNotes
+    }
+    
+    # Update our gallary data with any tags from the manifest file (if they exist)
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'Tags') {
+        $PSGallaryParams.Tags  = ($Script:Manifest.PrivateData.PSData.Tags | Foreach {$_}) -join ','
+    }
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'LicenseUri') {
+        if ($Script:Manifest.PrivateData.PSData.LicenseUri -ne $null) {
+            $PSGallaryParams.LicenseUri = $Script:Manifest.PrivateData.PSData.LicenseUri
+        }
+    }
+    if ( $Script:Manifest.PrivateData.PSdata.Keys -contains 'IconUri') {
+        if ($Script:Manifest.PrivateData.PSData.IconUri -ne $null) {
+            $PSGallaryParams.IconUri = $Script:Manifest.PrivateData.PSData.IconUri
+        }
+    }
+
+    New-PSGalleryProjectProfile @PSGallaryParams
+    Write-Host -NoNewLine "      Updating .psgallery profile"
+    Write-Host -ForeGroundColor green '...Complete!'
+   
 }
 
 # Synopsis: Update the psgallery project profile data file
