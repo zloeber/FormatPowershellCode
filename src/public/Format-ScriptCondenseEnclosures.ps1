@@ -58,29 +58,44 @@
         $Codeblock += $Code
     }
     end {
-        $ScriptText = ($Codeblock | Out-String).trim("`r`n")
-        try {
+       $ScriptText = ($Codeblock | Out-String).trim([System.Environment]::NewLine)
+        try
+        {
             $KindLines = @($ScriptText | Format-ScriptGetKindLines -Kind "HereString*")
             $KindLines += @($ScriptText | Format-ScriptGetKindLines  -Kind 'Comment')
         }
-        catch {
+        catch
+        {
             throw "$($FunctionName): Unable to properly parse the code for herestrings/comments..."
         }
-        ($Codeblock  -split "`r`n")  | Foreach {
+        ($Codeblock -split [System.Environment]::NewLine)  | Foreach {
             $LineCount++
-            if (($_ -match $regex) -and ($Count -gt 0)) {
+            
+            if (($_ -match $regex) -and ($Count -gt 0))
+            {
                 $encfound = $Matches[1]
-                # if the prior line has any kind of comment/hash ignore it
-                if (-not ($Output[$Count - 1] -match '#')) {
-                    Write-Verbose "$($FunctionName): Condensed enclosure $($encfound) at line $LineCount"
-                    $Output[$Count - 1] = "$($Output[$Count - 1]) $($encfound)"
+                Write-Verbose "$($FunctionName): Condensed enclosure $($encfound) at line $LineCount"
+
+                # Put enclosure at the end of the string if the string is shorter than column index
+                if($Output[$codeLine].Length -gt $codeColumn){
+                    $Output[$codeLine] = $Output[$codeLine].Insert($codeColumn-1,$encfound)
                 }
-                else {
-                    $Output += $_
-                    $Count++
+                else{
+                    $Output[$codeLine] = $Output[$codeLine].Insert($Output[$codeLine].Length,$encfound)
                 }
             }
-            else {
+            else
+            {
+                $tokens=[System.Management.Automation.PSParser]::Tokenize($_,[ref]$null)
+
+                # Get line and column to put enclosure in
+                foreach($token in $tokens){
+                    if(($token.Type -ne 'Comment') -and ($token.Type -ne 'NewLine')){
+                        $codeLine = $Count
+                        $codeColumn = $token.EndColumn
+                    }  
+                }
+
                 $Output += $_
                 $Count++
             }
