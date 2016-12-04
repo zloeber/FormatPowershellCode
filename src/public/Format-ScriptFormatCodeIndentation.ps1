@@ -86,7 +86,7 @@
                 $ScriptText = $ScriptText.Remove($RemoveStart,$RemoveEnd).Insert($RemoveStart,$IndentText)
             }
 
-            if ($token.Kind -eq 'R(Curly|Paren|Bracket)') {
+            if ($token.Kind -match 'R(Curly|Paren|Bracket)') {
                 $CurrentLevel++ 
             }
         }
