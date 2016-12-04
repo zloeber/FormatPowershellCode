@@ -74,7 +74,7 @@
             $Token = $Tokens[$t]
             $NextToken = $Tokens[$t-1]
 
-            if ($token.Kind -match '(L|At)(Curly|Paren|Bracket)' ) { 
+            if ($token.Kind -match '(L|At)(Curly|Paren|Bracket)') { 
                 $CurrentLevel-- 
             }  
 
