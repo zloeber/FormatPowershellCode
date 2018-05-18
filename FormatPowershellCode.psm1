@@ -1,13 +1,13 @@
 ﻿# This psm1 file is purely for development. The build script will recreate this file entirely.
 
 # Private and other methods and variables
-Get-ChildItem '.\src\private','.\src\other' -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
+Get-ChildItem "$PSScriptRoot\src\private","$PSScriptRoot\src\other" -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
     Write-Verbose "Dot sourcing private script file: $($_.Name)"
     . $_.FullName
 }
 
 # Load and export public methods
-Get-ChildItem '.\src\public' -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
+Get-ChildItem "$PSScriptRoot\src\public" -Recurse -Filter "*.ps1" -File | Sort-Object Name | Foreach { 
     Write-Verbose "Dot sourcing public script file: $($_.Name)"
     . $_.FullName
 

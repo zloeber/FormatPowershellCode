@@ -66,11 +66,10 @@
             ($args[0] -is [System.Management.Automation.Language.TypeExpressionAst]) -or 
             ($args[0] -is [System.Management.Automation.Language.TypeConstraintAst])
         }
-        $types = $ast.FindAll($predicate, $true)
+        $types = $ast.FindAll($predicate, $true) | Where-Object { $_.TypeName.Name -ne 'ordered' }
 
         for($t = $types.Count - 1; $t -ge 0; $t--) {
             $type = $types[$t]
-            
             $typeName = $type.TypeName.Name
             $extent = $type.TypeName.Extent
     		$FullTypeName = Invoke-Expression "$type"
